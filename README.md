@@ -6,6 +6,8 @@
 
 **Watch this project to be the first to phish!**
 
+![Dragnet Social Engineering Framework](https://threat.tevora.com/content/images/2018/08/dragnet-social-engineering-1.png)
+
 Presented at DEFCON 26, Dragnet is a social engineering framework which leverages AI to conduct spear-phishing & vishing at scale.
 
 Read the abstract [here](https://defcon.org/html/defcon-26/dc-26-speakers.html#Kain).
