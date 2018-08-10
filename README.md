@@ -4,7 +4,7 @@
 [![GPL Licence](https://img.shields.io/badge/LICENSE-GPLv3-blue.svg)](https://opensource.org/licenses/GPL-3.0/)
 ## To be released following DEFCON 26
 
-**Watch this project to be the first to phish!**
+**Watch 👀 👆👆 this project to be the first to phish!**
 
 ![Dragnet Social Engineering Framework](https://threat.tevora.com/content/images/2018/08/dragnet-social-engineering-1.png)
 
