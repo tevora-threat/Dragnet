@@ -1,7 +1,6 @@
 # Dragnet - Your Social Engineering Sidekick
 [![DEFCON 26 Badge](https://img.shields.io/badge/DEFCON-26-blue.svg)](https://defcon.org/html/defcon-26/dc-26-speakers.html#Kain)
 [![GRRCON 2018 Badge](https://img.shields.io/badge/GRRCON-2018-green.svg)](https://grrcon.com/presentations)
-
 ![OPEN-SOURCE](https://img.shields.io/badge/OPEN-SOURCE-orange.svg)
 [![GPL Licence](https://img.shields.io/badge/LICENSE-GPLv3-blue.svg)](https://opensource.org/licenses/GPL-3.0/)
 

@@ -8,6 +8,9 @@ Most integrations utilized for osint can be run in cloud functions.
 # ML
 Tensorflow is used for training and prediction
 
+# VoIP
+We use Asterisk to place our calls. You may use the SIP trunk of your choice- we currently use VoIP.ms
+
 # Endpoint
 This admin server runs a Node REST endpoint using Express.
 We use cloud functions to hit this endpoint.

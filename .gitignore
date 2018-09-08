@@ -4,6 +4,7 @@
 #!! ERROR: atom is undefined. Use list command to see defined gitignore types !!#
 
 ### Firebase ###
+admin/ak/ServiceAccountKey.json
 configs/fbConfig.js
 .idea
 **/node_modules/*
