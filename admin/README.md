@@ -15,7 +15,6 @@ We use Asterisk to place our calls. You may use the SIP trunk of your choice- we
 This admin server runs a Node REST endpoint using Express.
 We use cloud functions to hit this endpoint.
 
-Use can use node or nodemon to start up endpoint.js
-Start endpoint.js from `~`.
+After running `npm install`, you can use can use node or nodemon to start up endpoint.js (from the location of `~`).
 
 You'll need to set a password for basic-auth first. This is the password you'll give to cloud functions.
