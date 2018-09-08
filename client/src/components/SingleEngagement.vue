@@ -240,7 +240,7 @@
             </v-flex>
         </v-layout>
     </template>
-    <v-snackbar v-model="snackbar" :bottom="false" :left="false" :multi-line="true" :right="true" :timeout="30000" :top="true" :vertical="mode === 'vertical'">{{target.name}} just opened your email. <br>Would you like to vish him (or her) now?
+    <v-snackbar v-model="snackbar" :bottom="false" :left="false" :multi-line="true" :right="true" :timeout="30000" :top="true" :vertical="mode === 'vertical'">{{alert.target.name}} just opened your email. <br>Would you like to vish him (or her) now?
         <v-btn color="green darken-2" dark @click="toVishingAttack">
             Yes
         </v-btn><br>
@@ -283,6 +283,11 @@ export default {
     data() {
         return {
             dialog: false,
+            alert:{
+                target:{
+                    name:''
+                }
+            },
             snackbar: false,
             toasterLink: '',
             dropOptions: {
