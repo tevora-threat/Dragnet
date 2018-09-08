@@ -6,7 +6,7 @@
                 <v-flex v-if="attack.type === 'vishing'" md8 d-flex>
                     <v-card>
                         <v-container>
-                            <h2>Loan Follow-Up Script</h2><br>
+                            <h2>{{attack.template.title}} Script</h2><br>
                             <pre style="font-size:16pt;">{{scriptRender}}</pre>
                         </v-container>
                     </v-card>

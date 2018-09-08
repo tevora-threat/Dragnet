@@ -39,7 +39,7 @@
         <v-spacer></v-spacer>
         <v-flex xs3 align-center justify-center layout text-xs-center>
             <v-avatar :tile="tile" :size="150" color="grey lighten-4">
-                <img :src="engagement.logoUrl" alt="avatar">
+                <img :src="engagement.imgUrl" alt="avatar">
             </v-avatar>
         </v-flex>
     </v-layout>
@@ -283,9 +283,9 @@ export default {
     data() {
         return {
             dialog: false,
-            alert:{
-                target:{
-                    name:''
+            alert: {
+                target: {
+                    name: ''
                 }
             },
             snackbar: false,
@@ -383,7 +383,7 @@ export default {
             .then(doc1 => {
                 var tempObject = Object(doc1.data())
                 tempObject.id = doc1.id
-                
+
                 var options = {
                     weekday: 'long',
                     year: 'numeric',
@@ -404,6 +404,10 @@ export default {
                     .then(querySnapshot => {
                         tempObject.companyName = querySnapshot.data().clientName
                         this.testType = tempObject.testType
+
+                        if (querySnapshot.data().domainName) {
+                            tempObject.imgUrl = `//logo.clearbit.com/${querySnapshot.data().domainName}`
+                        }
 
                         this.engagement = tempObject
                         this.updateTargets(this.engagement.company, this.engagement.status)
@@ -645,7 +649,7 @@ export default {
                     .collection('targets')
                     .add(targetObject)
                     .then(function (docRef) {
-                        
+
                     })
             })
         },
@@ -678,8 +682,7 @@ export default {
                         .set(tObject, {
                             merge: true
                         })
-                        .then(function (docRef) {
-                        })
+                        .then(function (docRef) {})
                 } else {
                     var tObject = {
                         phishing: target.tPhishing,
@@ -742,7 +745,6 @@ export default {
         //end dz styling
         upTest(file) {
             var vm = this
-
 
             Papa.parse(file, {
                 complete: function (results) {
@@ -807,7 +809,7 @@ export default {
                         .collection('targetUploads')
                         .add(tempObject)
                         .then(function (docRef) {
-                            
+
                         })
                 })
         }
