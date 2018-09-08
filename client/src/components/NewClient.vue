@@ -26,6 +26,7 @@
     </v-layout>
 </v-container>
 </template>
+
 <script>
 const fb = require('../db/index.js')
 const db = fb.db
@@ -45,24 +46,28 @@ export default {
             notifications: false,
             sound: true,
             widgets: false,
-            items: [
-            ],
-            select: [
-            ]
+            items: [],
+            select: []
         }
     },
     methods: {
         saveTemplate() {
-            var tempObject = {}
-            tempObject.clientName = this.clientName
-            tempObject.domainName = this.domainName
-            tempObject.canRecord = this.canRecord
-            
+            var vm = this
+            var tempObject = {
+                clientName: this.clientName,
+                domainName: this.domainName,
+                canRecord: this.canRecord,
+                dateAdded: new Date()
+            }
+
             var ref = db
                 .collection('companies')
                 .add(tempObject)
                 .then(function (docRef) {
-                    
+
+                    vm.$router.push({
+                        name: 'Clients',
+                    })
                 })
         }
     }
