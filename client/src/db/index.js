@@ -1,14 +1,6 @@
 import firebase from 'firebase'
 import 'firebase/firestore'
-
-const config = {
-  apiKey: "",
-  authDomain: "",
-  databaseURL: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: ""
-}
+import config from '../../../configs/fbConfig'
 
 firebase.initializeApp(config)
 
