@@ -6,7 +6,7 @@ const config = {
   authDomain: "",
   databaseURL: "",
   projectId: "",
-  storageBucket: ".",
+  storageBucket: "",
   messagingSenderId: ""
 }
 
