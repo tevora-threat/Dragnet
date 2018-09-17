@@ -23,5 +23,6 @@ There is a full readme coming soon, but the short version is:
 - client should be run locally
 - functions will be deployed to cloud functions
 - cron setup is necessary
+- npm install anywhere you see a package.json
 
 *Development will be ongoing and commits will occur frequently. Check back often- as breaking changes are discovered, fixes will be pushed whenever possible.*
