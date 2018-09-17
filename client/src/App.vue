@@ -98,6 +98,11 @@ export default {
           icon: 'settings',
           title: 'Integrations',
           path: '/integrations'
+        },
+        {
+          icon: 'cloud_upload',
+          title: 'Import',
+          path: '/import'
         }
       ],
       miniVariant: true,

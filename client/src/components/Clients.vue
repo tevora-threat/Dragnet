@@ -1,6 +1,6 @@
 <template>
 <v-container fluid>
-    <h2>Clients</h2>
+    <h1>Clients</h1>
     <br>
     <v-layout row>
         <v-flex xs12 sm6 offset-sm3>
@@ -51,7 +51,7 @@ export default {
         };
     },
     created() {
-      //ordering by date added is a breaking change for companies added prior to tracking dateAdded.
+        //ordering by date added is a breaking change for companies added prior to tracking dateAdded.
         db.collection("companies").orderBy("dateAdded", "desc")
             .get()
             .then(querySnapshot => {
@@ -59,13 +59,13 @@ export default {
                     var tempObject = doc1.data()
                     tempObject.id = doc1.id
                     if (doc1.data().domainName) {
-                      //TODO: turn this into a cloud func
+                        //TODO: turn this into a cloud func
                         tempObject.logoLink = `//logo.clearbit.com/${doc1.data().domainName}`
                     }
 
                     if (doc1.data().dateAdded) {
                         tempObject.regTime = new Date(doc1.data().dateAdded.seconds * 1000).toLocaleDateString();
-}
+                    }
                     this.clients.push(tempObject)
                 })
             })
@@ -74,6 +74,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 h1,
 h2 {

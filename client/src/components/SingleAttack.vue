@@ -11,7 +11,80 @@
                         </v-container>
                     </v-card>
                 </v-flex>
-                <v-flex v-if="attack.type === 'phishing'" md9 d-flex>
+                <v-flex v-if="attack.type === 'phishing'" md1 d-flex>
+
+                    <v-card v-if="attack.status === 'ready'">
+                        <v-toolbar color="blue darken-2" dark>
+                            <v-toolbar-title>STATUS: <b>READY TO SEND</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-toolbar-title>
+                                <v-btn style="margin-bottom:0;margin-top:0;" v-if="attack.status === 'ready'" block large class="blue--text" color="white darken-2" @click.stop="sendEmail">
+                                    SEND EMAIL
+                                </v-btn>
+
+                            </v-toolbar-title>
+
+                        </v-toolbar>
+
+                    </v-card>
+                    <v-card v-if="attack.status === 'sendEmail'">
+                        <v-toolbar color="blue darken-2" dark>
+                            <v-toolbar-title>STATUS: <b>SENDING EMAIL</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-toolbar-title>
+
+                                <v-btn style="margin-bottom:0;margin-top:0;" v-if="attack.status === 'sendEmail'" block :loading="true" large class="blue--text" color="white darken-2">
+                                    SENDING
+                                </v-btn>
+                            </v-toolbar-title>
+
+                        </v-toolbar>
+
+                    </v-card>
+                    <v-card v-if="attack.status === 'scheduled'">
+                        <v-toolbar color="orange darken-2" dark>
+                            <v-toolbar-title>STATUS: <b>SCHEDULED</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-toolbar-title>SENDING: <b>{{new Date(attack.strictTime.seconds*1000).toLocaleDateString()}} - {{new Date(attack.strictTime.seconds*1000).toLocaleTimeString()}}</b></v-toolbar-title>
+
+                        </v-toolbar>
+
+                    </v-card>
+                    <v-card v-else-if="attack.status === 'sent'">
+                        <v-toolbar color="blue darken-2" dark>
+                            <v-toolbar-title>STATUS: <b>SENT</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+
+                        </v-toolbar>
+
+                    </v-card>
+                    <v-card v-else-if="attack.status === 'opened'">
+                        <v-toolbar color="red darken-4" dark>
+                            <v-toolbar-title>STATUS: <b>OPENED EMAIL</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+
+                        </v-toolbar>
+
+                    </v-card>
+                    <v-card v-else-if="attack.status === 'lpOpened'">
+                        <v-toolbar color="red darken-2" dark>
+                            <v-toolbar-title>STATUS: <b>OPENED LANDING PAGE</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+
+                        </v-toolbar>
+
+                    </v-card>
+                    <v-card v-else-if="attack.status === 'creds'">
+                        <v-toolbar color="red darken-2" dark>
+                            <v-toolbar-title>STATUS: <b>CREDS CAPTURED</b></v-toolbar-title>
+                            <v-spacer></v-spacer>
+
+                        </v-toolbar>
+
+                    </v-card>
+
+                </v-flex>
+                <v-flex v-if="attack.type === 'phishing'" md8 d-flex>
 
                     <v-card>
                         <v-container>
@@ -20,9 +93,9 @@
                                     <h3>Subject Line:</h3>
                                     <v-text-field :value="attack.template.subjectLine" outline single-line readonly></v-text-field>
                                 </v-flex>
-                                <v-flex xs6 m6>
+                                <v-flex v-if="attack.status === 'creds'" xs6 m6>
                                     <h3>Credentials Captured:</h3>
-                                    <v-text-field v-model="last" style="font-family:monospace;" class="v-input--is-focused testHeight credsText" :label="`${credsEmail}:${credsPW}`" solo-inverted readonly></v-text-field>
+                                    <v-text-field v-model="last" style="font-family:monospace;" class="v-input--is-focused testHeight credsText" :label="`${attack.credsEmail}:${attack.credsPW}`" solo-inverted readonly></v-text-field>
 
                                 </v-flex>
 
@@ -48,13 +121,13 @@
                                     <v-card>
 
                                         <div class="text-xs-center">
-                                            <v-btn style="margin-bottom:0;margin-top:0;" v-if="attack.status === 'ready'" :disabled="dialog" block large :loading="dialog" class="white--text" color="red darken-2" @click.stop="showDialogAndUpdateLog">
+                                            <v-btn style="margin-bottom:0;margin-top:0;" v-if="attack.status === 'ready'" block large class="white--text" color="red darken-2" @click.stop="placeCall">
                                                 Place Call
                                             </v-btn>
-                                            <v-btn v-else-if="attack.status === 'vuln' || attack.status === 'safe'" :disabled="dialog" :loading="dialog" block large style="margin-bottom:0;margin-top:0;" class="white--text" color="purple darken-2" @click.stop="playRec">
+                                            <v-btn v-else-if="attack.status === 'vuln' || attack.status === 'safe'" :disabled="!attack.recordingLocation" :loading="!attack.recordingLocation" block large style="margin-bottom:0;margin-top:0;" class="white--text" color="purple darken-2" @click.stop="playRec">
                                                 Play Call
                                             </v-btn>
-                                            <v-dialog v-model="dialog" hide-overlay persistent width="300">
+                                            <v-dialog v-if="attack.status === 'callAttacker'" v-model="dialog" hide-overlay persistent width="300">
                                                 <v-card color="primary" dark>
                                                     <v-card-text>
                                                         Calling Your Attack Phone
@@ -72,7 +145,7 @@
                                                     <v-list-tile>
                                                         <v-list-tile-content>
                                                             <v-list-tile-title>{{target.name}} Vishing Call</v-list-tile-title>
-                                                            <v-list-tile-sub-title>{{recording.date}} | {{recording.time}}</v-list-tile-sub-title>
+                                                            <v-list-tile-sub-title>{{recordingDate}} | {{recordingTime}}</v-list-tile-sub-title>
                                                         </v-list-tile-content>
 
                                                         <v-spacer></v-spacer>
@@ -100,7 +173,6 @@
                                                 </v-list>
                                             </v-card>
                                         </v-bottom-sheet>
-                                        <!-- <v-bottom-sheet inset v-model="showSheet" :position-x="x" :position-y="y" absolute offset-y persistent hide-overlay id="noBlock"> -->
                                         <v-bottom-sheet inset v-model="showSheet" :position-x="x" :position-y="y" absolute offset-y persistent id="noBlock">
 
                                             <v-card tile>
@@ -110,7 +182,9 @@
                                                     <v-list-tile>
                                                         <v-list-tile-content>
                                                             <v-list-tile-title>Calling {{target.name}}</v-list-tile-title>
-                                                            <v-list-tile-sub-title>Calling {{}} | Recording</v-list-tile-sub-title>
+                                                            <v-list-tile-sub-title v-if="attack.canRecord">Calling {{target.number}} | Recording</v-list-tile-sub-title>
+                                                            <v-list-tile-sub-title v-else>Calling {{target.number}} | <b>Not</b> Recording</v-list-tile-sub-title>
+
                                                         </v-list-tile-content>
 
                                                         <v-spacer></v-spacer>
@@ -146,7 +220,12 @@
                                 <v-flex d-flex xs12 sm6 md12>
                                     <v-card flat>
 
-                                        <v-textarea name="input-7-1" v-model="callNotes" box height="115px" label="Call Notes" auto-grow value="The Woodman set to work at once, and so sharp was his axe that the tree was soon chopped nearly through."></v-textarea>
+                                        <v-textarea name="input-7-1" v-model="attackNotes" box height="115px" label="Call Notes" auto-grow value=""></v-textarea>
+                                        <div class="text-xs-center">
+                                            <v-btn style="margin-bottom:0;margin-top:0;" v-if="attack.notes != attackNotes" block large class="white--text" color="blue darken-2" @click.stop="saveNotes">
+                                                Save Notes
+                                            </v-btn>
+                                        </div>
                                     </v-card>
                                 </v-flex>
 
@@ -162,7 +241,14 @@
                                 <v-flex d-flex xs12 sm6 md12>
                                     <v-card flat>
 
-                                        <v-textarea name="input-7-1" v-model="callNotes" box height="115px" label="Phishing Attack Notes" auto-grow value="The Woodman set to work at once, and so sharp was his axe that the tree was soon chopped nearly through."></v-textarea>
+                                        <v-textarea v-if="attack.notes != attackNotes" name="input-7-1" v-model="attackNotes" height="80px" box label="Phishing Attack Notes" auto-grow value=""></v-textarea>
+                                        <v-textarea v-else-if="attack.notes === attackNotes" name="input-7-1" v-model="attackNotes" height="135px" box label="Phishing Attack Notes" auto-grow value=""></v-textarea>
+
+                                        <div class="text-xs-center">
+                                            <v-btn style="margin-bottom:0;margin-top:0;" v-if="attack.notes != attackNotes" block large class="white--text" color="blue darken-2" @click.stop="saveNotes">
+                                                Save Notes
+                                            </v-btn>
+                                        </div>
                                     </v-card>
                                 </v-flex>
 
@@ -185,22 +271,21 @@
                                         <img :src="target.image">
                                     </v-list-tile-avatar>
 
-                                    <v-list-tile-content>
-                                        <v-list-tile-title>{{target.name}}</v-list-tile-title>
-                                        <v-list-tile-sub-title>{{target.companyName}}</v-list-tile-sub-title>
-                                    </v-list-tile-content>
-                                    <v-spacer></v-spacer>
-                                    <v-list-tile-action text-color="white">
-                                        <v-list-tile-action-text class="white--text" text-color="white">Target</v-list-tile-action-text>
-                                    </v-list-tile-action>
+                                        <v-list-tile-content>
+                                            <v-list-tile-title>{{target.name}}</v-list-tile-title>
+                                            <v-list-tile-sub-title>{{target.companyName}}</v-list-tile-sub-title>
+                                        </v-list-tile-content>
+                                        <v-spacer></v-spacer>
+                                        <v-list-tile-action text-color="white">
+                                            <v-list-tile-action-text class="white--text" text-color="white">Target</v-list-tile-action-text>
+                                        </v-list-tile-action>
                                 </v-list-tile>
                             </div>
                         </v-toolbar>
                         <v-container id="scroll-target" style="padding:0;padding-top:4px;padding-left:0;padding-right:16px;max-height: 396px" class="scroll-y">
                             <v-layout v-scroll:#scroll-target="onScroll" column style="height:60%;">
-                                <v-list two-line>
-
-                                    <v-subheader>Contact Information</v-subheader>
+                                <v-subheader>Contact Information</v-subheader>
+                                <v-list v-if="target.phone" two-line>
                                     <v-list-tile>
                                         <v-list-tile-action>
                                             <v-icon color="blue darken-4">phone</v-icon>
@@ -214,9 +299,11 @@
                                         </v-list-tile-action>
                                     </v-list-tile>
                                     <v-divider inset></v-divider>
-                                    <v-list-tile v-if="target.phishGuessName">
+                                </v-list>
+                                <v-list v-if="target.email" two-line>
+                                    <v-list-tile>
                                         <v-list-tile-action>
-                                            <v-icon color="indigo darken-2">email</v-icon>
+                                            <v-icon color="blue darken-4">email</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
                                             <v-list-tile-title>{{target.email}}</v-list-tile-title>
@@ -226,7 +313,10 @@
                                             <v-icon>check</v-icon>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-list-tile v-if="target.twitter">
+                                    <v-divider inset></v-divider>
+                                </v-list>
+                                <v-list v-if="target.twitter" two-line>
+                                    <v-list-tile>
                                         <v-list-tile-action>
                                             <v-icon style="color:#00aced;">mdi-twitter</v-icon>
                                         </v-list-tile-action>
@@ -238,8 +328,10 @@
                                             <v-icon>fingerprint</v-icon>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider v-if="target.twitter" inset></v-divider>
-                                    <v-list-tile v-if="target.linkedInURL">
+                                    <v-divider inset></v-divider>
+                                </v-list>
+                                <v-list v-if="target.linkedInURL" two-line>
+                                    <v-list-tile>
                                         <v-list-tile-action>
 
                                             <v-icon style="color:#0077B5;">mdi-linkedin</v-icon>
@@ -254,40 +346,68 @@
                                         </v-list-tile-action>
                                     </v-list-tile>
                                     <v-divider></v-divider>
-                                    <v-subheader>
-                                        Work Experience
-                                    </v-subheader>
-                                    <v-list-tile v-for="job in jobs" avatar :key="job['.key']">
-                                        <v-list-tile-avatar>
+                                </v-list>
+
+                                <v-subheader>
+                                    Work Experience
+                                </v-subheader>
+                                <v-list v-for="job in currentJobs" avatar :key="job['position']" two-line>
+
+                                    <v-list-tile>
+                                        <v-list-tile-avatar v-if="job.tempImgUrl">
                                             <img :src="job.tempImgUrl">
                                         </v-list-tile-avatar>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>{{job.position}}</v-list-tile-title>
-                                            <v-list-tile-sub-title>{{job.company}}</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>{{job.dates}}</v-list-tile-action-text>
-                                        </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>{{job.position}}</v-list-tile-title>
+                                                <v-list-tile-sub-title>{{job.company}}</v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{job.dates}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider v-for="job in jobs" avatar :key="job['.key']"></v-divider>
+                                    <v-divider :key="job['position']" inset></v-divider>
+                                </v-list>
+                                <v-list v-for="job in jobs" avatar :key="job['.key']" two-line>
 
-                                    <v-subheader>
-                                        Education
-                                    </v-subheader>
-                                    <v-list-tile avatar v-for="edu in edus" :key="edu['.key']">
-                                        <v-list-tile-avatar>
+                                    <v-list-tile>
+                                        <v-list-tile-avatar v-if="job.tempImgUrl">
+                                            <img :src="job.tempImgUrl">
+                                        </v-list-tile-avatar>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>{{job.position}}</v-list-tile-title>
+                                                <v-list-tile-sub-title>{{job.company}}</v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{job.dates}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                    </v-list-tile>
+                                    <v-divider v-if="jobs.indexOf(job)+1 == jobs.length"></v-divider>
+                                    <v-divider v-else :key="job['position']" inset></v-divider>
+                                </v-list>
+                                <v-subheader>
+                                    Education
+                                </v-subheader>
+                                <v-list v-for="edu in edus" :key="edu['schoolName']" two-line>
+
+                                    <v-list-tile avatar>
+                                        <v-list-tile-avatar v-if="edu.tempImgUrl">
                                             <img :src="edu.tempImgUrl">
                                         </v-list-tile-avatar>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>{{edu.degree}} - {{edu.major}}</v-list-tile-title>
-                                            <v-list-tile-sub-title>{{edu.schoolName}}</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>{{edu.startDate}} - {{edu.endDate}}</v-list-tile-action-text>
-                                        </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title v-if="edu.major === 'unlisted'">{{edu.degree}}</v-list-tile-title>
+                                                <v-list-tile-title v-else>{{edu.degree}} - {{edu.major}}</v-list-tile-title>
+                                                <v-list-tile-sub-title>{{edu.schoolName}}</v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{edu.startDate}} - {{edu.endDate}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider v-for="edu in edus" :key="edu['.key']" inset></v-divider>
+                                    <v-divider v-if="edus.indexOf(edu)+1 == edus.length"></v-divider>
+                                    <v-divider v-else :key="edu['schoolName']" inset></v-divider>
 
+                                </v-list>
+
+                                <v-list two-line>
                                     <v-subheader>
                                         Background Info
                                     </v-subheader>
@@ -303,24 +423,19 @@
                                             <v-icon color="gray lighten-2">fingerprint</v-icon>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile v-if="target.address != null">
+                                    <v-divider v-if="target.dob != null" inset></v-divider>
+                                    <v-list-tile v-if="target.location != null">
                                         <v-list-tile-action>
                                             <v-icon color="blue darken-1">location_on</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
-                                            <v-list-tile-title>{{target.address.street}}</v-list-tile-title>
-                                            <v-list-tile-sub-title>{{target.address.city}}</v-list-tile-sub-title>
+                                            <v-list-tile-title>{{target.location}}</v-list-tile-title>
                                         </v-list-tile-content>
                                         <v-list-tile-action>
                                             <v-icon color="gray lighten-2">fingerprint</v-icon>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
                                     <v-list-tile v-if="target.gender != null">
-                                        <!-- <v-list-tile-action>
-                                            <v-icon color="pink darken-2">mdi-gender-female</v-icon>
-                                        </v-list-tile-action> -->
                                         <v-list-tile-content>
                                             <v-list-tile-title>{{target.gender}}</v-list-tile-title>
                                             <v-list-tile-sub-title>Gender Pronouns</v-list-tile-sub-title>
@@ -343,119 +458,173 @@
                             <v-spacer></v-spacer>
 
                         </v-toolbar>
-                        <v-container v-if="attack.type === 'phishing'" id="scroll-target" style="padding:0;padding-top:4px;padding-left:0;padding-right:16px;max-height: 260px" class="scroll-y">
+
+                        <v-container id="scroll-target" style="padding:0;padding-top:4px;padding-left:0;padding-right:16px;max-height: 260px" class="scroll-y">
                             <v-layout v-scroll:#scroll-target="onScroll" column style="height:60%;">
-                                <v-list two-line>
-
-                                    <v-list-tile>
-                                        <v-list-tile-action>
-                                            <v-icon color="red darken-2">fa-keyboard</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Creds Entered</v-list-tile-title>
-                                            <v-list-tile-sub-title><kbd class="credsColor">{{credsEmail}}:{{credsPW}}</kbd></v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>{{creds.date}}<br>{{creds.time}}</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action>
-                                            <v-icon color="orange darken-2">fa-link</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Link Clicked</v-list-tile-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>8/10/18<br>1:47pm</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action>
-                                            <v-icon color="yellow darken-2">fa-envelope-open</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Email Opened</v-list-tile-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>8/10/18<br>1:47pm</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action>
-                                            <v-icon color="green darken-2">call_made</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Email Sent</v-list-tile-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>8/10/18<br>1:46pm</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                </v-list>
-
-                            </v-layout>
-                        </v-container>
-                        <v-container v-else id="scroll-target" style="padding:0;padding-top:4px;padding-left:0;padding-right:16px;max-height: 260px" class="scroll-y">
-                            <v-layout v-scroll:#scroll-target="onScroll" column style="height:60%;">
-                                <v-list two-line>
-
-                                    <template v-if="attack.status === 'safe'">
-                                        <v-list-tile>
+                                <v-list v-for="log in logs" :key="log['.key']" two-line>
+                                    <template>
+                                        <v-list-tile v-if="log.type === 'call' && log.status === 'callEnded'">
                                             <v-list-tile-action>
-                                                <v-icon color="green darken-2">play_arrow</v-icon>
+                                                <v-icon color="blue darken-2">fa-phone-slash</v-icon>
                                             </v-list-tile-action>
                                             <v-list-tile-content>
-                                                <v-list-tile-title>Vishing Call Unsuccessful</v-list-tile-title>
+                                                <v-list-tile-title>Call Ended</v-list-tile-title>
                                             </v-list-tile-content>
                                             <v-list-tile-action>
-                                                <v-list-tile-action-text>8/10/18<br>1:48pm</v-list-tile-action-text>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                             </v-list-tile-action>
                                         </v-list-tile>
-                                        <v-divider inset></v-divider>
-                                    </template>
-
-                                    <template v-if="updateLog">
-                                        <v-list-tile>
+                                        <v-list-tile v-if="log.type === 'call' && log.status === 'callingTarget'">
                                             <v-list-tile-action>
-                                                <v-icon color="orange darken-2">phone</v-icon>
+                                                <v-icon color="blue darken-2">fa-phone</v-icon>
                                             </v-list-tile-action>
                                             <v-list-tile-content>
-                                                <v-list-tile-title>Vishing Call Placed</v-list-tile-title>
+                                                <v-list-tile-title>Call Placed</v-list-tile-title>
                                             </v-list-tile-content>
                                             <v-list-tile-action>
-                                                <v-list-tile-action-text>8/10/18<br>1:47pm</v-list-tile-action-text>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                             </v-list-tile-action>
                                         </v-list-tile>
-                                        <v-divider inset></v-divider>
+                                        <v-list-tile v-if="log.type === 'callResult' && log.result === 'vm'">
+                                            <v-list-tile-action>
+                                                <v-icon color="blue darken-2">fa-microphone-alt-slash</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Got Voicemail</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'callResult' && log.result === 'safe'">
+                                            <v-list-tile-action>
+                                                <v-icon color="green darken-2">fa-thumbs-up</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Target Not Vuln</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'callResult' && log.result === 'vuln'">
+                                            <v-list-tile-action>
+                                                <v-icon color="red darken-2">fa-exclamation-triangle</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Target Vuln</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'creds'">
+                                            <v-list-tile-action>
+                                                <v-icon color="red darken-2">fa-keyboard</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Creds Entered</v-list-tile-title>
+                                                <v-list-tile-sub-title><kbd class="credsColor">{{log.credsEmail}}:{{log.credsPW}}</kbd></v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'lpOpened'">
+                                            <v-list-tile-action>
+                                                <v-icon color="orange darken-2">fa-link</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Link Clicked</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'emailOpened'">
+                                            <v-list-tile-action>
+                                                <v-icon color="yellow darken-2">fa-envelope-open</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Email Opened</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'emailSent'">
+                                            <v-list-tile-action>
+                                                <v-icon color="green darken-2">call_made</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Email Sent</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'testTypeChosen'">
+                                            <v-list-tile-action>
+                                                <v-icon color="purple darken-2">mdi-hook</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title v-if="log.test === 'both'">Targeted for Phishing & Vishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
+                                                <v-list-tile-title v-if="log.test === 'phishing'">Targeted for Phishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
+                                                <v-list-tile-title v-if="log.test === 'vishing'">Targeted for Vishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'templatesSuggested'">
+                                            <v-list-tile-action>
+                                                <v-icon color="blue darken-1">mdi-brain</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title v-if="log.test === 'both'"><b>Phishing</b> & <b>Vishing</b> Templates Suggested</v-list-tile-title>
+                                                <v-list-tile-title v-if="log.test === 'phishing'"><b>Phishing</b> Template Suggested</v-list-tile-title>
+                                                <v-list-tile-title v-if="log.test === 'vishing'"><b>Vishing</b> Template Suggested</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'osintComplete'">
+                                            <v-list-tile-action>
+                                                <v-icon color="orange darken-2">fingerprint</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title><b>OSINT</b> Complete</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile v-if="log.type === 'osintStarted'">
+                                            <v-list-tile-action>
+                                                <v-icon color="green darken-2">fingerprint</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title><b>OSINT</b> Started</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-list-tile avatar v-if="log.type === 'addedToCompany'">
+                                            <v-list-tile-avatar v-if="log.companyUrl">
+                                                <img :src="log.logoUrl">
+                                        </v-list-tile-avatar>
+                                                <v-list-tile-content>
+                                                    <v-list-tile-title>Added to <b>{{log.clientName}}</b> Targets</v-list-tile-title>
+                                                </v-list-tile-content>
+                                                <v-list-tile-action>
+                                                    <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                                </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-divider v-if="logs.length-1 > logs.indexOf(log)" inset></v-divider>
                                     </template>
 
-                                    <v-list-tile>
-                                        <v-list-tile-action>
-                                            <v-icon color="yellow darken-2">fa-envelope-open</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Linked Email Opened</v-list-tile-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>8/10/18<br>1:47pm</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action>
-                                            <v-icon color="green darken-2">call_made</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Linked Email Sent</v-list-tile-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>8/10/18<br>1:46pm</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
                                 </v-list>
 
                             </v-layout>
@@ -471,19 +640,36 @@
 </template>
 
 <script>
-var audioElement = document.createElement('audio')
-audioElement.setAttribute('preload', 'none')
-const fb = require('../db/index.js')
-const db = fb.db
+var audioElement = document.createElement("audio");
+audioElement.setAttribute("preload", "none");
+const fb = require("../db/index.js");
+const db = fb.db;
+const storageRef = fb.storage;
+
 export default {
-    name: 'SingleAttack',
+    name: "SingleAttack",
+
+    firestore() {
+        return {
+            attack: db.collection("attacks").doc(this.$route.params.attackID),
+            logs: db
+                .collection("logs")
+                .where("attackID", "==", this.$route.params.attackID)
+                .orderBy("dateAdded", "desc")
+        };
+    },
     data() {
         return {
             recording: {},
             updateLog: false,
+            creds: false,
+            jobs: [],
+            logs: [],
+            currentJobs: [],
+            edus: [],
             x: 0,
             scrubber: 0,
-            audioRecordingUrl: '',
+            audioRecordingUrl: "",
             recordingDate: null,
             recordingTime: null,
             paused: false,
@@ -493,8 +679,8 @@ export default {
             y: 0,
             target: {},
             attack: {},
-            lorem: 'testing',
-            dialog: false,
+            lorem: "testing",
+            dialog: true,
             engagement: {},
             testType: {
                 cbPhishing: false,
@@ -502,231 +688,379 @@ export default {
                 cbPhysical: false
             },
             script: {},
-            scriptRender: '',
+            scriptRender: "Testing 123",
             scriptTags: {},
-            callNotes: '',
-            scriptID: '',
-            search: '',
-            testScript: '',
-            targetName: '',
-            targetID: ''
-        }
+            attackID: "",
+            attackNotes: "",
+            scriptID: "",
+            search: "",
+            testScript: "",
+            targetName: "",
+            targetID: ""
+        };
     },
     beforeCreate() {
-
-        this.attackID = this.$route.params.attackID
+        this.attackID = this.$route.params.attackID;
 
         db
-            .collection('attacks')
+            .collection("attacks")
             .doc(this.attackID)
             .get()
             .then(doc1 => {
-                
-                var tempObject = Object(doc1.data())
-                tempObject.id = doc1.id
-                
+                var tempObject = Object(doc1.data());
+                tempObject.id = doc1.id;
 
-                if (tempObject.type === 'vishing') {
+                if (tempObject.type === "vishing") {
                     if (tempObject.script != null) {
-                        var newLineString = tempObject.script.scriptRaw.replace('\\n', '\n')
-                        var renderScript = newLineString.replace(
-                            '${targetName}',
-                            tempObject.targetName
-                        )
-                        tempObject.script.scriptRender = renderScript
+                        var newLineString = tempObject.script.scriptRaw.replace(
+                            "\\n",
+                            "\n"
+                        );
+
+                        tempObject.script.scriptRender = newLineString;
                     }
 
-                    tempObject.target.ageNum = this.getAge(tempObject.target.dob)
-                    this.updateInfo(tempObject)
+                    tempObject.target.ageNum = this.getAge(tempObject.target.dob);
+                    this.updateInfo(tempObject);
                 } else {
-
                     db
-                        .collection('emailTemplates')
+                        .collection("emailTemplates")
                         .doc(tempObject.templateID)
                         .get()
                         .then(doc1 => {
-                            tempObject.template = doc1.data()
-                            tempObject.target.ageNum = this.getAge(tempObject.target.dob)
-                            this.updatePhishingInfo(tempObject)
-                        })
+                            tempObject.template = doc1.data();
+                            tempObject.target.ageNum = this.getAge(tempObject.target.dob);
+                            this.updatePhishingInfo(tempObject);
+                        });
                 }
-            })
 
-    },
-    created() {
+                var storage = storageRef.ref();
 
-    },
-    computed: {
+                tempObject.target.edus.forEach(edu => {
+                    console.log(edu);
 
+                    if (edu.imgUrl) {
+                        var imgParts = edu.imgUrl.split("/");
+                        var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`;
+                        var eduRef = storage.child(fixedImg);
+                        eduRef.getDownloadURL().then(url => {
+                            edu.tempImgUrl = url;
+                        });
+                    }
+
+                    this.edus.push(edu);
+                });
+
+                var sortedJobs = [];
+
+                tempObject.target.jobs.forEach(job => {
+                    if (job.imgUrl) {
+                        var imgParts = job.imgUrl.split("/");
+                        var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`;
+                        var jobRef = storage.child(fixedImg);
+                        jobRef.getDownloadURL().then(url => {
+                            job.tempImgUrl = url;
+                            console.log(url);
+                        });
+                    }
+
+                    if (job.isPresent) {
+                        this.currentJobs.push(job);
+                    } else {
+                        sortedJobs.push(job);
+                    }
+
+                    console.log(job);
+                });
+
+                sortedJobs.sort(function (a, b) {
+                    return b.sortEndDate.seconds - a.sortEndDate.seconds;
+                });
+
+                this.jobs = sortedJobs;
+            });
     },
+    created() {},
+    computed: {},
     watch: {
-        dialog(val) {
-            if (!val) return
+        attack(val) {
+            var vm = this;
+            var storage = storageRef.ref();
+            if (val.recordingLocation) {
+                var recRef = storage.child(val.recordingLocation);
+                recRef.getDownloadURL().then(url => {
+                    this.audioRecordingUrl = url;
+                    var timeSecs = val.recordingLocation.split("-")[1].split(".")[0];
+                    this.recordingDate = new Date(timeSecs * 1000).toLocaleDateString();
+                    this.recordingTime = new Date(timeSecs * 1000).toLocaleTimeString();
+                });
+            }
 
-            setTimeout(() => this.byeLog(), 4000)
+            if (val.target.image) {
+                console.log("has image");
+                console.log(val.target.image);
+
+                var imgParts = val.target.image.split("/");
+                console.log(imgParts);
+
+                var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`;
+                var tImgRef = storage.child(fixedImg);
+                tImgRef.getDownloadURL().then(url => {
+                    vm.target.image = url;
+                });
+            }
+
+            if (val.status) {
+                switch (val.status) {
+                    case "callAttacker":
+                        //blue modal
+                        break;
+                    case "callingTarget":
+                        this.byeLog();
+                        break;
+                    case "waitingResult":
+                        this.byeLog2();
+                        break;
+                    case "safe":
+                        break;
+                    case "vuln":
+                        break;
+                    case "vm":
+                        break;
+                    default:
+                        break;
+                }
+            }
+        },
+
+        logs(val) {
+            console.log(val);
+
+            val.forEach(log => {
+                if (log.ts) {
+                    log.date = new Date(log.ts * 1000).toLocaleDateString();
+                    log.time = new Date(log.ts * 1000).toLocaleTimeString();
+                } else if (log.dateAdded) {
+                    log.date = new Date(
+                        log.dateAdded.seconds * 1000
+                    ).toLocaleDateString();
+                    log.time = new Date(
+                        log.dateAdded.seconds * 1000
+                    ).toLocaleTimeString();
+                }
+            });
         }
     },
     mounted: {},
     methods: {
-        showDialogAndUpdateLog() {
-            var vm = this
-            vm.dialog = true
-            vm.updateLog = true
+        saveNotes() {
+            this.$firestore.attack.set({
+                notes: this.attackNotes
+            }, {
+                merge: true
+            });
+        },
+        placeCall() {
+            var vm = this;
+
+            this.$firestore.attack.set({
+                status: "callAttacker"
+            }, {
+                merge: true
+            });
+        },
+
+        sendEmail() {
+            var vm = this;
+
+            this.$firestore.attack.set({
+                status: "sendEmail"
+            }, {
+                merge: true
+            });
         },
 
         toDossier(targetID) {
-            var vm = this
+            var vm = this;
             vm.$router.push({
-                name: 'Dossier',
+                name: "Dossier",
                 params: {
                     targetID: targetID
                 }
-            })
+            });
         },
         endAttack(result) {
-            var vm = this
-            setTimeout(() => (vm.dialogEnd = false), 1000)
+            var vm = this;
 
-            vm.recordingDate = Date().toLocaleDateString
-            vm.recordingTime = Date().toLocaleTimeString
+            var attackID = this.$route.params.attackID;
+
+            vm.recordingDate = Date().toLocaleDateString;
+            vm.recordingTime = Date().toLocaleTimeString;
 
             switch (result) {
-                case 'vuln':
+                case "vuln":
                     db
-                        .collection('attacks')
-                        .doc(this.attackID)
+                        .collection("attacks")
+                        .doc(attackID)
                         .set({
-                            status: 'vuln'
+                            status: "vuln"
                         }, {
                             merge: true
                         })
                         .then(function () {
-                            vm.attack.status = 'vuln'
-                        })
+                            vm.attack.status = "vuln";
+                        });
 
-                    break
-                case 'safe':
                     db
-                        .collection('attacks')
-                        .doc(this.attackID)
+                        .collection("logs")
+                        .add({
+                            type: "callResult",
+                            result: "vuln",
+                            dateAdded: new Date(),
+                            attackID: attackID
+                        })
+                        .then(function () {
+                            vm.dialogEnd = false;
+                        });
+
+                    break;
+                case "safe":
+                    db
+                        .collection("attacks")
+                        .doc(attackID)
                         .set({
-                            status: 'safe'
+                            status: "safe"
                         }, {
                             merge: true
                         })
                         .then(function () {
-                            vm.attack.status = 'safe'
-                        })
-                    break
-                case 'vm':
+                            vm.attack.status = "safe";
+                        });
+
                     db
-                        .collection('attacks')
-                        .doc(this.attackID)
+                        .collection("logs")
+                        .add({
+                            type: "callResult",
+                            result: "safe",
+                            dateAdded: new Date(),
+                            attackID: attackID
+                        })
+                        .then(function () {
+                            vm.dialogEnd = false;
+                        });
+
+                    break;
+                case "vm":
+                    db
+                        .collection("attacks")
+                        .doc(attackID)
                         .set({
-                            status: 'vm'
+                            status: "ready"
                         }, {
                             merge: true
                         })
                         .then(function () {
-                            vm.attack.status = 'vm'
+                            vm.attack.status = "ready";
+                        });
+                    db
+                        .collection("logs")
+                        .add({
+                            type: "callResult",
+                            result: "vm",
+                            dateAdded: new Date(),
+                            attackID: attackID
                         })
-                    break
+                        .then(function () {
+                            vm.dialogEnd = false;
+                        });
+                    break;
 
                 default:
-                    break
+                    break;
             }
         },
         aBuffer() {
-            var vm = this
+            var vm = this;
             setInterval(function () {
-                var cTime = audioElement.currentTime / audioElement.duration * 100
+                var cTime = audioElement.currentTime / audioElement.duration * 100;
                 if (cTime != 100) {
-                    vm.scrubber = cTime
+                    vm.scrubber = cTime;
                 } else {
-                    vm.scrubber = 0
-                    vm.paused = true
+                    vm.scrubber = 0;
+                    vm.paused = true;
                 }
-
-            }, 100)
+            }, 100);
         },
         playRec() {
-            this.showRecSheet = true
-            audioElement.setAttribute(
-                'src',
-                this.audioRecordingUrl
-            )
-            audioElement.play()
-            audioElement.pl
-            this.aBuffer()
+            this.showRecSheet = true;
+            audioElement.setAttribute("src", this.audioRecordingUrl);
+            audioElement.play();
+            this.aBuffer();
         },
         rwRec() {
-            audioElement.currentTime = 0
+            audioElement.currentTime = 0;
             if (!this.paused) {
-                audioElement.play()
+                audioElement.play();
             }
         },
         getAge(dateString) {
-            var today = new Date()
-            var birthDate = new Date(dateString)
-            var age = today.getFullYear() - birthDate.getFullYear()
-            var m = today.getMonth() - birthDate.getMonth()
+            var today = new Date();
+            var birthDate = new Date(dateString);
+            var age = today.getFullYear() - birthDate.getFullYear();
+            var m = today.getMonth() - birthDate.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--
+                age--;
             }
-            return age
+            return age;
         },
 
         playPauseRec() {
             if (this.paused) {
-                audioElement.play()
-                // this.aBuffer("start");
+                audioElement.play();
             } else {
-                audioElement.pause()
-                // this.aBuffer();
+                audioElement.pause();
             }
-            this.paused = !this.paused
+            this.paused = !this.paused;
         },
         byeLog() {
-            this.dialog = false
-            this.showSheet = !this.showSheet
-            setTimeout(() => this.byeLog2(), 18000)
+            this.dialog = false;
+            this.showSheet = true;
         },
         byeLog2() {
-            this.showSheet = !this.showSheet
-            this.dialogEnd = true
+            this.showSheet = false;
+            this.dialogEnd = true;
         },
         noBlock() {
-            var element = document.getElementById('noBlock')
-            element.classList.remove('v-overlay--active')
+            var element = document.getElementById("noBlock");
+            element.classList.remove("v-overlay--active");
         },
         updateInfo(attack) {
-            var vm = this
-            vm.attack = attack
-            vm.target = attack.target
-            vm.targetID = attack.targetID
-            vm.scriptRender = attack.script.scriptRender
+            var vm = this;
+            vm.attack = attack;
+            vm.target = attack.target;
+            vm.targetID = attack.targetID;
+            vm.attackNotes = attack.notes;
         },
         updatePhishingInfo(attack) {
-            var vm = this
-            vm.attack = attack
-            vm.target = attack.target
-            vm.targetID = attack.targetID
+            var vm = this;
+            vm.attack = attack;
+            vm.target = attack.target;
+            vm.targetID = attack.targetID;
         },
         close() {
-            var vm = this
-            vm.dialogue = false
+            var vm = this;
+            vm.dialogue = false;
         },
         save() {
-            this.close()
+            this.close();
         },
-        showDialogue() {
-        }
-
+        showDialogue() {}
     }
-}
+};
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 div.v-overlay--active {
     /* touch-action: auto !important; */
@@ -770,11 +1104,11 @@ a {
     color: #2c3e50;
 }
 
-.input-field input[type='text']:focus+label {
+.input-field input[type="text"]:focus+label {
     color: #000;
 }
 
-.input-field input[type='text']:focus {
+.input-field input[type="text"]:focus {
     border-bottom: 1px solid #000;
     box-shadow: 0 1px 0 0 #000;
 }

@@ -38,8 +38,8 @@
         </template>
         <v-spacer></v-spacer>
         <v-flex xs3 align-center justify-center layout text-xs-center>
-            <v-avatar :tile="tile" :size="150" color="grey lighten-4">
-                <img :src="engagement.imgUrl" alt="avatar">
+            <v-avatar v-if="engagement.imgUrl" :tile="tile" :size="150">
+                <img :src="engagement.imgUrl">
             </v-avatar>
         </v-flex>
     </v-layout>
@@ -53,15 +53,11 @@
         <v-layout row>
             <v-flex xs12>
                 <h3>Targets Selected for this Engagement:</h3><br>
-                <v-data-table :headers="headers" :items="targets" :search="search" hide-actions v-model="selected" item-key="name" select-all class="elevation-10">
+                <v-data-table v-if="testType.cbPhishing && !testType.cbVishing" :headers="phishHeaders" :items="targets" :search="search" hide-actions v-model="selected" item-key="name" select-all class="elevation-10">
                     <template slot="headerCell" slot-scope="props">
                         <v-tooltip bottom>
-                            <span slot="activator">
-          {{ props.header.text }}
-        </span>
-                            <span>
-          {{ props.header.text }}
-        </span>
+                            <span slot="activator">{{ props.header.text }}</span>
+                            <span>{{ props.header.text }}</span>
                         </v-tooltip>
                     </template>
                     <template slot="items" slot-scope="props">
@@ -70,11 +66,75 @@
                         </td>
                         <td>{{ props.item.name }}</td>
                         <td>{{ props.item.email }}</td>
-                        <td>{{ props.item.phone }}</td>
-                        <td>
+                        <td :mask="mask">{{ props.item.phone }}</td>
+                        <td v-if="testType.cbPhishing">
                             <v-checkbox color="blue darken-1" v-model="props.item.tPhishing" primary hide-details></v-checkbox>
                         </td>
+                        <td v-if="testType.cbVishing">
+                            <v-checkbox color="blue darken-1" v-model="props.item.tVishing" primary hide-details></v-checkbox>
+                        </td>
+                    </template>
+                    <template slot="no-data">
+                        <v-alert :value="true" color="green darken-2" icon="warning">
+                            This is your first engagement with {{engagement.companyName}}. Import some targets above to get started!
+                        </v-alert>
+                    </template>
+                    <template slot="footer">
+                        <td colspan="100%">
+                            <center><strong>Once you've finalized your targets and chosen their test types, click the <span style="color:green;">SAVE</span> below to begin OSINT.</strong></center>
+                        </td>
+                    </template>
+                </v-data-table>
+                <v-data-table v-if="!testType.cbPhishing && testType.cbVishing" :headers="vishHeaders" :items="targets" :search="search" hide-actions v-model="selected" item-key="name" select-all class="elevation-10">
+                    <template slot="headerCell" slot-scope="props">
+                        <v-tooltip bottom>
+                            <span slot="activator">{{ props.header.text }}</span>
+                            <span>{{ props.header.text }}</span>
+                        </v-tooltip>
+                    </template>
+                    <template slot="items" slot-scope="props">
                         <td>
+                            <v-checkbox color="blue darken-1" v-model="props.selected" primary hide-details></v-checkbox>
+                        </td>
+                        <td>{{ props.item.name }}</td>
+                        <td>{{ props.item.email }}</td>
+                        <td :mask="mask">{{ props.item.phone }}</td>
+                        <td v-if="testType.cbPhishing">
+                            <v-checkbox color="blue darken-1" v-model="props.item.tPhishing" primary hide-details></v-checkbox>
+                        </td>
+                        <td v-if="testType.cbVishing">
+                            <v-checkbox color="blue darken-1" v-model="props.item.tVishing" primary hide-details></v-checkbox>
+                        </td>
+                    </template>
+                    <template slot="no-data">
+                        <v-alert :value="true" color="green darken-2" icon="warning">
+                            This is your first engagement with {{engagement.companyName}}. Import some targets above to get started!
+                        </v-alert>
+                    </template>
+                    <template slot="footer">
+                        <td colspan="100%">
+                            <center><strong>Once you've finalized your targets and chosen their test types, click the <span style="color:green;">SAVE</span> below to begin OSINT.</strong></center>
+                        </td>
+                    </template>
+                </v-data-table>
+                <v-data-table v-if="testType.cbPhishing && testType.cbVishing" :headers="bothHeaders" :items="targets" :search="search" hide-actions v-model="selected" item-key="name" select-all class="elevation-10">
+                    <template slot="headerCell" slot-scope="props">
+                        <v-tooltip bottom>
+                            <span slot="activator">{{ props.header.text }}</span>
+                            <span>{{ props.header.text }}</span>
+                        </v-tooltip>
+                    </template>
+                    <template slot="items" slot-scope="props">
+                        <td>
+                            <v-checkbox color="blue darken-1" v-model="props.selected" primary hide-details></v-checkbox>
+                        </td>
+                        <td>{{ props.item.name }}</td>
+                        <td>{{ props.item.email }}</td>
+                        <td :mask="mask">{{ props.item.phone }}</td>
+                        <td v-if="testType.cbPhishing">
+                            <v-checkbox color="blue darken-1" v-model="props.item.tPhishing" primary hide-details></v-checkbox>
+                        </td>
+                        <td v-if="testType.cbVishing">
                             <v-checkbox color="blue darken-1" v-model="props.item.tVishing" primary hide-details></v-checkbox>
                         </td>
                     </template>
@@ -104,28 +164,24 @@
         <v-layout row>
             <v-flex xs12 sm12 md12>
 
-                <v-data-table :headers="stagingHeaders" :items="selectedTargets" :loading="loading" hide-actions class="elevation-10">
+                <v-data-table v-if="testType.cbPhishing && !testType.cbVishing" :headers="phishStagingHeaders" :items="selectedTargets" :loading="loading" hide-actions class="elevation-10">
 
                     <template slot="headerCell" slot-scope="props">
                         <v-tooltip bottom>
-                            <span slot="activator">
-          {{ props.header.text }}
-        </span>
-                            <span>
-          {{ props.header.text }}
-        </span>
+                            <span slot="activator">{{ props.header.text }}</span>
+                            <span>{{ props.header.text }}</span>
                         </v-tooltip>
                     </template>
                     <template slot="items" slot-scope="props">
 
                         <td style="cursor:pointer" @click="toDossier(props.item['.key'])">
-                            <v-avatar v-if="props.item.image != null">
-                                <img style="padding:4px" :src="props.item.image">
+                            <v-avatar v-if="props.item.imageUrl != null">
+                                <img style="padding:4px" :src="props.item.imageUrl">
                             </v-avatar>
-                            {{ props.item.name }}
+                                {{ props.item.name }}
                         </td>
                         <td>{{ props.item.email }}</td>
-                        <td>{{ props.item.phone }}
+                        <td :mask="mask">{{ props.item.phone }}
 
                         </td>
 
@@ -140,13 +196,210 @@
                             </td>
                         </template>
                         <template v-else>
-                            <td v-if="props.item.phishGuessType === 'Money'" style="cursor:pointer;color:#43a047" @click="toAttack(props.item.phishingAttackLink)">
+                            <td v-if="props.item.phishGuessType === 'Money'" style="cursor:pointer;color:#43a047" @click="toAttack(props.item.phishGuessID)">
                                 <b> {{props.item.phishGuessName}}</b>
                             </td>
-                            <td v-else-if="props.item.phishGuessType === 'Flashy'" style="cursor:pointer;color:#cc0000" @click="toAttack(props.item.phishingAttackLink)">
+                            <td v-else-if="props.item.phishGuessType === 'Flashy'" style="cursor:pointer;color:#cc0000" @click="toAttack(props.item.phishGuessID)">
                                 <b> {{props.item.phishGuessName}}</b>
                             </td>
-                            <td v-else style="cursor:pointer;color:#2196f3" @click="toAttack(props.item.phishingAttackLink)">
+                            <td v-else style="cursor:pointer;color:#2196f3" @click="toAttack(props.item.phishGuessID)">
+                                <b> {{props.item.phishGuessName}}</b>
+                            </td>
+                        </template>
+                        <td>
+
+                            <v-chip id="errorChip" @click.stop="openDialog" v-if="props.item.errorStatus != null" color="red" text-color="white">
+                                <v-avatar>
+                                    <v-icon>error_outline</v-icon>
+                                </v-avatar>
+                                {{props.item.errorStatus}}
+
+                            </v-chip>
+
+                            <v-chip v-if="props.item.phishingStatus ==='Creds Captured'" color="red darken-1" text-color="white">
+                                <v-avatar>
+                                    <v-icon>mail_outline</v-icon>
+                                </v-avatar>
+                                {{props.item.phishingStatus}}
+
+                            </v-chip>
+
+                            <v-chip v-else-if="props.item.phishingStatus != null" color="blue" text-color="white">
+                                <v-avatar>
+                                    <v-icon>mail_outline</v-icon>
+                                </v-avatar>
+                                {{props.item.phishingStatus}}
+
+                            </v-chip>
+                            <v-chip v-if="props.item.vishingStatus ==='Call Unsuccessful'" color="green darken-1" text-color="white">
+                                <v-avatar>
+                                    <v-icon>phone</v-icon>
+                                </v-avatar>
+                                {{props.item.vishingStatus}}
+
+                            </v-chip>
+                            <v-chip v-else-if="props.item.vishingStatus != null" color="purple" text-color="white">
+                                <v-avatar>
+                                    <v-icon>phone</v-icon>
+                                </v-avatar>
+                                {{props.item.vishingStatus}}
+
+                            </v-chip>
+                            <v-chip v-if="props.item.mainStatus != null" color="orange" text-color="white">
+                                <v-avatar>
+                                    <v-icon>fingerprint</v-icon>
+                                </v-avatar>
+                                {{props.item.mainStatus}}
+                            </v-chip>
+                        </td>
+                    </template>
+                    <template slot="footer">
+                        <td v-if="engagement.status === 'launch'" colspan="100%">
+                            <center><strong><span style="color:red;">ENGAGEMENT IN PROGRESS</span></strong></center>
+                        </td>
+                        <td v-if="engagement.status === 'osintStaging'" colspan="100%">
+                            <center><strong>When you're ready to start the engagement, <span style="color:green;">LAUNCH</span> below.</strong></center>
+                        </td>
+                    </template>
+                </v-data-table>
+                <v-data-table v-if="!testType.cbPhishing && testType.cbVishing" :headers="vishStagingHeaders" :items="selectedTargets" :loading="loading" hide-actions class="elevation-10">
+
+                    <template slot="headerCell" slot-scope="props">
+                        <v-tooltip bottom>
+                            <span slot="activator">{{ props.header.text }}</span>
+                            <span>{{ props.header.text }}</span>
+                        </v-tooltip>
+                    </template>
+                    <template slot="items" slot-scope="props">
+
+                        <td style="cursor:pointer" @click="toDossier(props.item['.key'])">
+                            <v-avatar v-if="props.item.imageUrl != null">
+                                <img style="padding:4px" :src="props.item.imageUrl">
+                            </v-avatar>
+                                {{ props.item.name }}
+                        </td>
+                        <td>{{ props.item.email }}</td>
+                        <td :mask="mask">{{ props.item.phone }}
+
+                        </td>
+
+                        <template v-if="!props.item.vishing">
+                            <td><i>n/a</i>
+                            </td>
+                        </template>
+                        <template v-else-if="!props.item.vishGuessID">
+                            <td>
+                                <v-progress-circular v-if="props.item.errorStatus != null" :value="70" color="red"></v-progress-circular>
+                                <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
+                            </td>
+                        </template>
+                        <template v-else>
+
+                            <td v-if="props.item.phishGuessType === 'Money'" style="cursor:pointer;color:#43a047" @click="toAttack(props.item.vishGuessID)">
+                                <b> {{props.item.vishGuessName}}</b>
+                            </td>
+                            <td v-else-if="props.item.phishGuessType === 'Flashy'" style="cursor:pointer;color:#cc0000" @click="toAttack(props.item.vishGuessID)">
+                                <b> {{props.item.vishGuessName}}</b>
+                            </td>
+                            <td v-else style="cursor:pointer;color:#2196f3" @click="toAttack(props.item.vishGuessID)">
+                                <b> {{props.item.vishGuessName}}</b>
+                            </td>
+                        </template>
+                        <td>
+
+                            <v-chip id="errorChip" @click.stop="openDialog" v-if="props.item.errorStatus != null" color="red" text-color="white">
+                                <v-avatar>
+                                    <v-icon>error_outline</v-icon>
+                                </v-avatar>
+                                {{props.item.errorStatus}}
+
+                            </v-chip>
+
+                            <v-chip v-if="props.item.phishingStatus ==='Creds Captured'" color="red darken-1" text-color="white">
+                                <v-avatar>
+                                    <v-icon>mail_outline</v-icon>
+                                </v-avatar>
+                                {{props.item.phishingStatus}}
+
+                            </v-chip>
+
+                            <v-chip v-else-if="props.item.phishingStatus != null" color="blue" text-color="white">
+                                <v-avatar>
+                                    <v-icon>mail_outline</v-icon>
+                                </v-avatar>
+                                {{props.item.phishingStatus}}
+
+                            </v-chip>
+                            <v-chip v-if="props.item.vishingStatus ==='Call Unsuccessful'" color="green darken-1" text-color="white">
+                                <v-avatar>
+                                    <v-icon>phone</v-icon>
+                                </v-avatar>
+                                {{props.item.vishingStatus}}
+
+                            </v-chip>
+                            <v-chip v-else-if="props.item.vishingStatus != null" color="purple" text-color="white">
+                                <v-avatar>
+                                    <v-icon>phone</v-icon>
+                                </v-avatar>
+                                {{props.item.vishingStatus}}
+
+                            </v-chip>
+                            <v-chip v-if="props.item.mainStatus != null" color="orange" text-color="white">
+                                <v-avatar>
+                                    <v-icon>fingerprint</v-icon>
+                                </v-avatar>
+                                {{props.item.mainStatus}}
+                            </v-chip>
+                        </td>
+                    </template>
+                    <template slot="footer">
+                        <td v-if="engagement.status === 'launch'" colspan="100%">
+                            <center><strong><span style="color:red;">ENGAGEMENT IN PROGRESS</span></strong></center>
+                        </td>
+                        <td v-if="engagement.status === 'osintStaging'" colspan="100%">
+                            <center><strong>When you're ready to start the engagement, <span style="color:green;">LAUNCH</span> below.</strong></center>
+                        </td>
+                    </template>
+                </v-data-table>
+                <v-data-table v-if="testType.cbPhishing && testType.cbVishing" :headers="bothStagingHeaders" :items="selectedTargets" :loading="loading" hide-actions class="elevation-10">
+
+                    <template slot="headerCell" slot-scope="props">
+                        <v-tooltip bottom>
+                            <span slot="activator">{{ props.header.text }}</span>
+                            <span>{{ props.header.text }}</span>
+                        </v-tooltip>
+                    </template>
+                    <template slot="items" slot-scope="props">
+
+                        <td style="cursor:pointer" @click="toDossier(props.item['.key'])">
+                            <v-avatar v-if="props.item.imageUrl != null">
+                                <img style="padding:4px" :src="props.item.imageUrl">
+                            </v-avatar>
+                                {{ props.item.name }}
+                        </td>
+                        <td>{{ props.item.email }}</td>
+                        <td :mask="mask">{{ props.item.phone }}
+
+                        </td>
+
+                        <template v-if="!props.item.phishing">
+                            <td><i>n/a</i>
+                            </td>
+                        </template>
+                        <template v-else-if="!props.item.phishGuessID">
+                            <td>
+                                <v-progress-circular v-if="props.item.errorStatus != null" :value="40" color="red"></v-progress-circular>
+                                <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
+                            </td>
+                        </template>
+                        <template v-else>
+                            <td v-if="props.item.phishGuessType === 'Money'" style="cursor:pointer;color:#43a047" @click="toAttack(props.item.phishGuessID)">
+                                <b> {{props.item.phishGuessName}}</b>
+                            </td>
+                            <td v-else-if="props.item.phishGuessType === 'Flashy'" style="cursor:pointer;color:#cc0000" @click="toAttack(props.item.phishGuessID)">
+                                <b> {{props.item.phishGuessName}}</b>
+                            </td>
+                            <td v-else style="cursor:pointer;color:#2196f3" @click="toAttack(props.item.phishGuessID)">
                                 <b> {{props.item.phishGuessName}}</b>
                             </td>
                         </template>
@@ -163,13 +416,13 @@
                         </template>
                         <template v-else>
 
-                            <td v-if="props.item.phishGuessType === 'Money'" style="cursor:pointer;color:#43a047" @click="toAttack(props.item.vishingAttackLink)">
+                            <td v-if="props.item.phishGuessType === 'Money'" style="cursor:pointer;color:#43a047" @click="toAttack(props.item.vishGuessID)">
                                 <b> {{props.item.vishGuessName}}</b>
                             </td>
-                            <td v-else-if="props.item.phishGuessType === 'Flashy'" style="cursor:pointer;color:#cc0000" @click="toAttack(props.item.vishingAttackLink)">
+                            <td v-else-if="props.item.phishGuessType === 'Flashy'" style="cursor:pointer;color:#cc0000" @click="toAttack(props.item.vishGuessID)">
                                 <b> {{props.item.vishGuessName}}</b>
                             </td>
-                            <td v-else style="cursor:pointer;color:#2196f3" @click="toAttack(props.item.vishingAttackLink)">
+                            <td v-else style="cursor:pointer;color:#2196f3" @click="toAttack(props.item.vishGuessID)">
                                 <b> {{props.item.vishGuessName}}</b>
                             </td>
                         </template>
@@ -282,6 +535,9 @@ export default {
     },
     data() {
         return {
+            showLogo: true,
+            //TODO: get mask working
+            mask: 'phone',
             dialog: false,
             alert: {
                 target: {
@@ -312,7 +568,7 @@ export default {
             search: '',
             selectedTargets: [],
             selected: [],
-            stagingHeaders: [{
+            bothStagingHeaders: [{
                     text: 'Name',
                     align: 'left',
                     value: 'name'
@@ -339,8 +595,53 @@ export default {
                     value: 'targetStatus'
                 }
             ],
+            phishStagingHeaders: [{
+                    text: 'Name',
+                    align: 'left',
+                    value: 'name'
+                },
+                {
+                    text: 'Email',
+                    value: 'email'
+                },
+                {
+                    text: 'Phone',
+                    value: 'phone'
+                },
+                {
+                    text: 'Phishing Template',
+                    align: 'left',
+                    value: 'phishing'
+                },
+                {
+                    text: 'Last Update',
+                    value: 'targetStatus'
+                }
+            ],
+            vishStagingHeaders: [{
+                    text: 'Name',
+                    align: 'left',
+                    value: 'name'
+                },
+                {
+                    text: 'Email',
+                    value: 'email'
+                },
+                {
+                    text: 'Phone',
+                    value: 'phone'
+                },
+                {
+                    text: 'Vishing Template',
+                    value: 'vishing'
+                },
+                {
+                    text: 'Last Update',
+                    value: 'targetStatus'
+                }
+            ],
             stagingTargets: [],
-            headers: [{
+            bothHeaders: [{
                     text: 'Name',
                     align: 'left',
                     value: 'name'
@@ -361,6 +662,42 @@ export default {
                     text: 'Vishing?',
                     value: 'tVishing'
                 }
+            ],
+            vishHeaders: [{
+                    text: 'Name',
+                    align: 'left',
+                    value: 'name'
+                },
+                {
+                    text: 'Email',
+                    value: 'email'
+                },
+                {
+                    text: 'Phone',
+                    value: 'phone'
+                },
+                {
+                    text: 'Vishing?',
+                    value: 'tVishing'
+                }
+            ],
+            phishHeaders: [{
+                    text: 'Name',
+                    align: 'left',
+                    value: 'name'
+                },
+                {
+                    text: 'Email',
+                    value: 'email'
+                },
+                {
+                    text: 'Phone',
+                    value: 'phone'
+                },
+                {
+                    text: 'Phishing?',
+                    value: 'tPhishing'
+                },
             ],
             targets: [],
 
@@ -403,6 +740,7 @@ export default {
                     .get()
                     .then(querySnapshot => {
                         tempObject.companyName = querySnapshot.data().clientName
+                        tempObject.domainName = querySnapshot.data().domainName
                         this.testType = tempObject.testType
 
                         if (querySnapshot.data().domainName) {
@@ -494,11 +832,20 @@ export default {
                         }
 
                         if (targetAll.image != null) {
-                            this.$firestore.selectedTargets.doc(targetKey).set({
-                                image: targetAll.image
-                            }, {
-                                merge: true
+                            var storage = storageRef.ref()
+                            var imgParts = targetAll.image.split("/")
+                            var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`
+                            var tImgRef = storage.child(fixedImg)
+                            tImgRef.getDownloadURL().then(url => {
+                                this.$firestore.selectedTargets.doc(targetKey).set({
+                                    image: targetAll.image,
+                                    imageUrl: url
+
+                                }, {
+                                    merge: true
+                                })
                             })
+
                         }
 
                         this.$firestore.selectedTargets.doc(targetKey).set({
@@ -523,6 +870,11 @@ export default {
         }
     },
     methods: {
+        imageLoadError() {
+            console.log("no image for that url");
+            var vm = this
+            vm.showLogo = false
+        },
 
         toVishingAttack() {
             this.snackbar = false
@@ -534,6 +886,8 @@ export default {
 
         },
         toAttack(attackID) {
+            console.log(attackID);
+
             var vm = this
             vm.$router.push({
                 name: 'SingleAttack',
@@ -619,7 +973,6 @@ export default {
                             }
                             var mergeObject = Object.assign(additions, tempTarget)
                             vm.stagingTargets.push(mergeObject)
-                            //vm.selected.push(mergeObject);
                         })
                         vm.loading = false
                     })
@@ -638,6 +991,7 @@ export default {
                 })
         },
         saveTargets() {
+            var vm = this
             this.csvValue.forEach(target => {
                 this.target.newTarget = true
                 var targetObject = target
@@ -649,8 +1003,21 @@ export default {
                     .collection('targets')
                     .add(targetObject)
                     .then(function (docRef) {
+                        var target = docRef.id
+                        var logObject = {
+                            clientName: this.engagement.companyName,
+                            companyUrl: this.engagement.domainName,
+                            dateAdded: new Date(),
+                            targetID: target,
+                            type: 'addedToCompany'
+                        }
+
+                        db.collection('logs').add(logObject).then(function (logRef) {
+                            console.log("LOG ADDED: ", logRef.id);
+                        })
 
                     })
+
             })
         },
         startQueue() {
@@ -663,6 +1030,8 @@ export default {
             });
         },
         testSelected() {
+            var engagement = this.engagement;
+            var vm = this
             this.selected.forEach(target => {
                 if (target.newTarget) {
                     var tObject = {
@@ -682,7 +1051,61 @@ export default {
                         .set(tObject, {
                             merge: true
                         })
-                        .then(function (docRef) {})
+                        .then(function (docRef) {
+
+                            var testType = null
+                            if (target.tPhishing && target.tVishing) {
+                                testType = 'both'
+                            } else {
+                                if (target.tPhishing) {
+                                    testType = 'phishing'
+
+                                } else {
+                                    testType = 'vishing'
+                                }
+                            }
+
+                            if (testType != null) {
+                                var logObject = {
+                                    clientName: engagement.companyName,
+                                    engagement: vm.engagementID,
+                                    dateAdded: new Date(),
+                                    target: target.tID,
+
+                                    targetID: target.tID,
+                                    type: 'testTypeChosen',
+                                    test: testType
+                                }
+
+                                db.collection('logs').add(logObject)
+                                    .then(function () {
+                                        console.log("Document successfully written!");
+
+                                        var logObject = {
+                                            engagement: vm.engagementID,
+                                            dateAdded: new Date(),
+                                            target: target.tID,
+                                            targetID: target.tID,
+                                            type: 'osintStarted',
+                                        }
+
+                                        db.collection('logs').add(logObject)
+                                            .then(function () {
+                                                console.log("Document successfully written!");
+
+                                            })
+                                            .catch(function (error) {
+                                                console.error("Error writing document: ", error);
+                                            });
+
+                                    })
+                                    .catch(function (error) {
+                                        console.error("Error writing document: ", error);
+                                    });
+
+                            }
+
+                        })
                 } else {
                     var tObject = {
                         phishing: target.tPhishing,
@@ -714,7 +1137,6 @@ export default {
                 }
 
             })
-            var vm = this
             vm.engagement.status = 'osintStaging'
             var engRef = db.collection('engagements').doc(this.engagementID)
 
@@ -724,7 +1146,6 @@ export default {
                 merge: true
             })
         },
-        //this is the dropzone styling
         template: function () {
             return `<div class="dz-preview dz-file-preview" style="width:200px;box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
     0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12) !important;">
@@ -742,7 +1163,6 @@ export default {
             </div>
         `
         },
-        //end dz styling
         upTest(file) {
             var vm = this
 
@@ -750,7 +1170,6 @@ export default {
                 complete: function (results) {
 
                     var draggedTargets = results.data
-                    draggedTargets.forEach
                     draggedTargets.forEach(target => {
                         if (target.length == 1 || target[2] === '') {
                             console.log('empty cell')
@@ -767,25 +1186,70 @@ export default {
                                 phone: target[3],
                                 status: 'osint'
                             }
-                            //this does not account for duplicates yet, we will have to fix that by checking for matching email or phone number.
-                            var addTargetToFB = db
-                                .collection('targets')
-                                .add(fbObject)
-                                .then(function (docRef) {
-                                    console.log('Target Uploaded: => ', docRef.id)
-                                    var tempObject = {
-                                        value: false,
-                                        tID: docRef.id,
-                                        name: `${target[0]} ${target[1]}`,
-                                        email: target[2],
-                                        phone: target[3],
-                                        tPhishing: true,
-                                        tVishing: true,
-                                        newTarget: true
-                                    }
-                                    vm.targets.push(tempObject)
-                                    vm.selected.push(tempObject)
+                            var duplicateEmails = []
+
+                            db.collection('targets').where('email', '==', fbObject.email).get().then(querySnapshot => {
+                                querySnapshot.forEach(snap => {
+                                    var dupTarget = snap.data()
+                                    dupTarget.tID = snap.id
+                                    duplicateEmails.push(dupTarget)
                                 })
+
+                                if (duplicateEmails.length > 0) {
+
+                                    var existingTarget = duplicateEmails[0]
+                                    existingTarget.tPhishing = true
+                                    existingTarget.tVishing = true
+                                    existingTarget.newTarget = false
+                                    existingTarget.value = false
+
+                                    vm.targets.push(existingTarget)
+                                    vm.selected.push(existingTarget)
+                                } else {
+                                    var addTargetToFB = db
+                                        .collection('targets')
+                                        .add(fbObject)
+                                        .then(function (docRef) {
+                                            console.log('Target Uploaded: => ', docRef.id)
+
+                                            var tempObject = {
+                                                value: false,
+                                                tID: docRef.id,
+                                                name: `${target[0]} ${target[1]}`,
+                                                email: target[2],
+                                                phone: target[3],
+                                                tPhishing: true,
+                                                tVishing: true,
+                                                newTarget: true
+                                            }
+                                            vm.targets.push(tempObject)
+                                            vm.selected.push(tempObject)
+
+                                            var targetForLog = docRef.id
+                                            var logObject = {
+                                                clientName: vm.engagement.companyName,
+                                                companyUrl: vm.engagement.domainName,
+                                                dateAdded: new Date(),
+                                                target: targetForLog,
+                                                targetID: targetForLog,
+                                                type: 'addedToCompany'
+                                            }
+
+                                            console.log(`Log to add: ${logObject}`);
+
+                                            db.collection('logs').add(logObject)
+                                                .then(function () {
+                                                    console.log("Document successfully written!");
+                                                })
+                                                .catch(function (error) {
+                                                    console.error("Error writing document: ", error);
+                                                });
+
+                                        })
+                                }
+
+                            })
+
                         }
                     })
 
@@ -818,8 +1282,10 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 @import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
+
 span#errorChip span {
     cursor: pointer !important;
 }

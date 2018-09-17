@@ -16,10 +16,10 @@
                             <v-list-tile-avatar v-if="target.tmpImg">
                                 <img :src="target.tmpImg">
                             </v-list-tile-avatar>
-                            <v-list-tile-content>
-                                <v-list-tile-title>{{target.name}}</v-list-tile-title>
-                                <v-list-tile-sub-title>{{target.headline}}</v-list-tile-sub-title>
-                            </v-list-tile-content>
+                                <v-list-tile-content>
+                                    <v-list-tile-title>{{target.name}}</v-list-tile-title>
+                                    <v-list-tile-sub-title>{{target.headline}}</v-list-tile-sub-title>
+                                </v-list-tile-content>
 
                         </v-list-tile>
 
@@ -40,7 +40,7 @@
 
                             <v-list two-line>
                                 <template>
-                                    <v-list-tile>
+                                    <v-list-tile v-if="target.phone">
                                         <v-list-tile-action>
                                             <v-icon color="blue darken-2">phone</v-icon>
                                         </v-list-tile-action>
@@ -52,7 +52,7 @@
                                             <v-icon>check</v-icon>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
+                                    <v-divider v-if="target.phone" inset></v-divider>
                                     <v-list-tile v-if="target.email">
                                         <v-list-tile-action>
                                             <v-icon color="indigo darken-1">email</v-icon>
@@ -79,7 +79,7 @@
                                         </v-list-tile-action>
                                     </v-list-tile>
                                     <v-divider v-if="target.twitter" inset></v-divider>
-                                    <v-list-tile v-if="target.linkedInURL">
+                                    <v-list-tile @click="toLinkedIn(target.linkedInUrl)" v-if="target.linkedInURL">
                                         <v-list-tile-action>
 
                                             <v-icon style="color:#0077B5;">mdi-linkedin</v-icon>
@@ -96,123 +96,151 @@
                                 </template>
                             </v-list>
                         </v-card>
+                        <template v-if="jobs.length>0 || currentJobs.length>0">
+                            <br><br>
 
-                        <br><br>
+                            <v-card>
+                                <v-toolbar color="blue-grey darken-1" dark>
+                                    <v-toolbar-title>Work History</v-toolbar-title>
 
-                        <v-card>
-                            <v-toolbar color="blue-grey darken-1" dark>
-                                <v-toolbar-title>Work History</v-toolbar-title>
+                                    <v-spacer></v-spacer>
 
-                                <v-spacer></v-spacer>
+                                </v-toolbar>
+                                <v-subheader>
+                                    Current
+                                </v-subheader>
+                                <v-list two-line v-for="job in currentJobs" avatar :key="job['position']">
+                                    <template>
 
-                            </v-toolbar>
+                                        <v-list-tile>
+                                            <v-list-tile-avatar v-if="job.tempImgUrl">
+                                                <img :src="job.tempImgUrl">
+                                            </v-list-tile-avatar>
+                                                <v-list-tile-content>
+                                                    <v-list-tile-title>{{job.position}}</v-list-tile-title>
+                                                    <v-list-tile-sub-title>{{job.company}}</v-list-tile-sub-title>
+                                                </v-list-tile-content>
+                                                <v-list-tile-action>
+                                                    <v-list-tile-action-text>{{job.dates}}</v-list-tile-action-text>
+                                                </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-divider v-if="jobs.length-1 > jobs.indexOf(job)" inset></v-divider>
 
-                            <v-list two-line>
-                                <template>
-                                    <v-subheader>
-                                        Current
-                                    </v-subheader>
-                                    <v-list-tile v-for="job in jobs" avatar :key="job['.key']">
-                                        <v-list-tile-avatar>
-                                            <img :src="job.tempImgUrl">
-                                        </v-list-tile-avatar>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>{{job.position}}</v-list-tile-title>
-                                            <v-list-tile-sub-title>{{job.company}}</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>{{job.dates}}</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider v-for="job in jobs" avatar :key="job['.key']"></v-divider>
+                                    </template>
 
-                                </template>
-                                
+                                </v-list>
+                                <v-subheader>
+                                    Previous
+                                </v-subheader>
+                                <v-list two-line v-for="job in jobs" avatar :key="job['position']">
+                                    <template>
 
-                            </v-list>
-                        </v-card>
+                                        <v-list-tile>
+                                            <v-list-tile-avatar v-if="job.tempImgUrl">
+                                                <img :src="job.tempImgUrl">
+                                            </v-list-tile-avatar>
+                                                <v-list-tile-content>
+                                                    <v-list-tile-title>{{job.position}}</v-list-tile-title>
+                                                    <v-list-tile-sub-title>{{job.company}}</v-list-tile-sub-title>
+                                                </v-list-tile-content>
+                                                <v-list-tile-action>
+                                                    <v-list-tile-action-text>{{job.dates}}</v-list-tile-action-text>
+                                                </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-divider v-if="jobs.length-1 > jobs.indexOf(job)" inset></v-divider>
 
-                        <br><br>
-                        <v-card>
-                            <v-toolbar color="blue-grey darken-1" dark>
-                                <v-toolbar-title>Education</v-toolbar-title>
+                                    </template>
 
-                                <v-spacer></v-spacer>
+                                </v-list>
+                            </v-card>
+                        </template>
+                        <template v-if="edus.length>0">
+                            <br><br>
+                            <v-card>
+                                <v-toolbar color="blue-grey darken-1" dark>
+                                    <v-toolbar-title>Education</v-toolbar-title>
 
-                            </v-toolbar>
+                                    <v-spacer></v-spacer>
 
-                            <v-list two-line>
-                                <template>
+                                </v-toolbar>
 
-                                    <v-list-tile avatar v-for="edu in edus" :key="edu['.key']">
-                                        <v-list-tile-avatar>
-                                            <img :src="edu.tempImgUrl">
-                                        </v-list-tile-avatar>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>{{edu.degree}} - {{edu.major}}</v-list-tile-title>
-                                            <v-list-tile-sub-title>{{edu.schoolName}}</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>{{edu.startDate}} - {{edu.endDate}}</v-list-tile-action-text>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider v-for="edu in edus" :key="edu['.key']" inset></v-divider>
-                                </template>
-                            </v-list>
-                        </v-card>
+                                <v-list v-for="edu in edus" :key="edu['.key']" two-line>
+                                    <template>
 
-                        <br><br>
-                        <v-card>
-                            <v-toolbar color="blue-grey darken-1" dark>
-                                <v-toolbar-title>Background Info</v-toolbar-title>
+                                        <v-list-tile avatar>
+                                            <v-list-tile-avatar v-if="edu.tempImgUrl">
+                                                <img :src="edu.tempImgUrl">
+                                            </v-list-tile-avatar>
+                                                <v-list-tile-content>
+                                                    <v-list-tile-title v-if="edu.major === 'unlisted'">{{edu.degree}}</v-list-tile-title>
+                                                    <v-list-tile-title v-else>{{edu.degree}} - {{edu.major}}</v-list-tile-title>
 
-                                <v-spacer></v-spacer>
+                                                    <v-list-tile-sub-title>{{edu.schoolName}}</v-list-tile-sub-title>
+                                                </v-list-tile-content>
+                                                <v-list-tile-action>
+                                                    <v-list-tile-action-text>{{edu.startDate}} - {{edu.endDate}}</v-list-tile-action-text>
+                                                </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-divider v-if="edus.length-1 > edus.indexOf(edu)" inset></v-divider>
+                                    </template>
+                                </v-list>
+                            </v-card>
+                        </template>
+                        <template v-if="background.length>0">
+                            <br><br>
+                            <v-card>
+                                <v-toolbar color="blue-grey darken-1" dark>
+                                    <v-toolbar-title>Background Info</v-toolbar-title>
 
-                            </v-toolbar>
+                                    <v-spacer></v-spacer>
 
-                            <v-list two-line>
-                                <template>
-                                    <v-list-tile v-if="target.school != null">
-                                        <v-list-tile-action>
-                                            <v-icon color="indigo">calendar_today</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>{{target.dob}}</v-list-tile-title>
-                                            <v-list-tile-sub-title>Date of Birth</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-icon color="gray lighten-2">fingerprint</v-icon>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile v-if="target.school != null">
-                                        <v-list-tile-action>
-                                            <v-icon color="blue darken-1">location_on</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>1400 West Avenue</v-list-tile-title>
-                                            <v-list-tile-sub-title>Palo Alto</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-icon color="gray lighten-2">fingerprint</v-icon>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile v-if="target.school != null">
-                                        <v-list-tile-action>
-                                            <v-icon color="pink darken-2">mdi-gender-female</v-icon>
-                                        </v-list-tile-action>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>She, Her</v-list-tile-title>
-                                            <v-list-tile-sub-title>Gender Pronouns</v-list-tile-sub-title>
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-icon color="gray lighten-2">fingerprint</v-icon>
-                                        </v-list-tile-action>
-                                    </v-list-tile>
-                                </template>
-                            </v-list>
-                        </v-card><br>
+                                </v-toolbar>
+
+                                <v-list two-line>
+                                    <template>
+                                        <v-list-tile v-if="target.school != null">
+                                            <v-list-tile-action>
+                                                <v-icon color="indigo">calendar_today</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>{{target.dob}}</v-list-tile-title>
+                                                <v-list-tile-sub-title>Date of Birth</v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-icon color="gray lighten-2">fingerprint</v-icon>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-divider inset></v-divider>
+                                        <v-list-tile v-if="target.school != null">
+                                            <v-list-tile-action>
+                                                <v-icon color="blue darken-1">location_on</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>1400 West Avenue</v-list-tile-title>
+                                                <v-list-tile-sub-title>Palo Alto</v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-icon color="gray lighten-2">fingerprint</v-icon>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                        <v-divider inset></v-divider>
+                                        <v-list-tile v-if="target.school != null">
+                                            <v-list-tile-action>
+                                                <v-icon color="pink darken-2">mdi-gender-female</v-icon>
+                                            </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>She, Her</v-list-tile-title>
+                                                <v-list-tile-sub-title>Gender Pronouns</v-list-tile-sub-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-icon color="gray lighten-2">fingerprint</v-icon>
+                                            </v-list-tile-action>
+                                        </v-list-tile>
+                                    </template>
+                                </v-list>
+                            </v-card>
+                        </template>
+                        <br>
                     </v-layout>
                 </v-container>
             </v-flex>
@@ -265,7 +293,7 @@
                     </v-toolbar>
                     <v-container id="scroll-target" style="padding:0;padding-top:4px;padding-left:8px;padding-right:16px;max-height: 442px" class="scroll-y">
                         <v-layout v-scroll:#scroll-target="onScroll" column style="height:60%;">
-                            <v-list two-line>
+                            <v-list v-for="log in logs" :key="log['.key']" two-line>
                                 <template>
                                     <v-list-tile v-if="log.type === 'creds'">
                                         <v-list-tile-action>
@@ -279,7 +307,6 @@
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
                                     <v-list-tile v-if="log.type === 'linkClicked'">
                                         <v-list-tile-action>
                                             <v-icon color="orange darken-2">fa-link</v-icon>
@@ -291,21 +318,19 @@
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action v-if="log.type === 'emailOpened'">
+                                    <v-list-tile v-if="log.type === 'emailOpened'">
+                                        <v-list-tile-action>
                                             <v-icon color="yellow darken-2">fa-envelope-open</v-icon>
                                         </v-list-tile-action>
-                                        <v-list-tile-content v-if="log.type === 'emailOpened'">
+                                        <v-list-tile-content>
                                             <v-list-tile-title>Email Opened</v-list-tile-title>
                                         </v-list-tile-content>
                                         <v-list-tile-action>
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action v-if="log.type === 'emailSent'">
+                                    <v-list-tile v-if="log.type === 'emailSent'">
+                                        <v-list-tile-action>
                                             <v-icon color="green darken-2">call_made</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
@@ -315,33 +340,34 @@
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action v-if="log.type === 'testTypeChosen'">
+                                    <v-list-tile v-if="log.type === 'testTypeChosen'">
+                                        <v-list-tile-action>
                                             <v-icon color="purple darken-2">mdi-hook</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
-                                            <v-list-tile-title>Targeted for Phishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
+                                            <v-list-tile-title v-if="log.test === 'both'">Targeted for Phishing & Vishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
+                                            <v-list-tile-title v-if="log.test === 'phishing'">Targeted for Phishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
+                                            <v-list-tile-title v-if="log.test === 'vishing'">Targeted for Vishing on <b>{{log.clientName}}</b> engagement</v-list-tile-title>
                                         </v-list-tile-content>
                                         <v-list-tile-action>
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action v-if="log.type === 'templatedSuggested'">
+                                    <v-list-tile v-if="log.type === 'templatesSuggested'">
+                                        <v-list-tile-action>
                                             <v-icon color="blue darken-1">mdi-brain</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
-                                            <v-list-tile-title><b>Phishing</b> & <b>Vishing</b> Templates Suggested</v-list-tile-title>
+                                            <v-list-tile-title v-if="log.test === 'both'"><b>Phishing</b> & <b>Vishing</b> Templates Suggested</v-list-tile-title>
+                                            <v-list-tile-title v-if="log.test === 'phishing'"><b>Phishing</b> Template Suggested</v-list-tile-title>
+                                            <v-list-tile-title v-if="log.test === 'vishing'"><b>Vishing</b> Template Suggested</v-list-tile-title>
                                         </v-list-tile-content>
                                         <v-list-tile-action>
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action v-if="log.type === 'osintComplete'">
+                                    <v-list-tile v-if="log.type === 'osintComplete'">
+                                        <v-list-tile-action>
                                             <v-icon color="orange darken-2">fingerprint</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
@@ -351,9 +377,8 @@
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile>
-                                        <v-list-tile-action v-if="log.type === 'osintStarted'">
+                                    <v-list-tile v-if="log.type === 'osintStarted'">
+                                        <v-list-tile-action>
                                             <v-icon color="green darken-2">fingerprint</v-icon>
                                         </v-list-tile-action>
                                         <v-list-tile-content>
@@ -363,19 +388,18 @@
                                             <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
                                         </v-list-tile-action>
                                     </v-list-tile>
-                                    <v-divider inset></v-divider>
-                                    <v-list-tile avatar>
-                                        <v-list-tile-avatar>
-                                            <img :src="logLogoUrl">
+                                    <v-list-tile avatar v-if="log.type === 'addedToCompany'">
+                                        <v-list-tile-avatar v-if="log.companyUrl">
+                                            <img :src="log.logoUrl">
                                         </v-list-tile-avatar>
-                                        <v-list-tile-content>
-                                            <v-list-tile-title>Added to <b>{{log.clientName}}</b> Targets</v-list-tile-title>
-                                            <!-- <v-list-tile-sub-title>Work Landline</v-list-tile-sub-title> -->
-                                        </v-list-tile-content>
-                                        <v-list-tile-action>
-                                            <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
-                                        </v-list-tile-action>
+                                            <v-list-tile-content>
+                                                <v-list-tile-title>Added to <b>{{log.clientName}}</b> Targets</v-list-tile-title>
+                                            </v-list-tile-content>
+                                            <v-list-tile-action>
+                                                <v-list-tile-action-text>{{log.date}}<br>{{log.time}}</v-list-tile-action-text>
+                                            </v-list-tile-action>
                                     </v-list-tile>
+                                    <v-divider v-if="logs.length-1 > logs.indexOf(log)" inset></v-divider>
                                 </template>
                             </v-list>
                         </v-layout>
@@ -384,8 +408,8 @@
                 <br>
 
             </v-flex>
-            
-        </v-flex>
+
+            </v-flex>
     </v-layout>
 </v-container>
 </template>
@@ -405,6 +429,10 @@ export default {
         }
     },
     methods: {
+        toLinkedIn(url) {
+            //TODO - add modal alert confirming you want to visit their linkedin (could show up on target's view history if you're logged into LI)
+            // if yes, open LI in new tab
+        },
         getAge(dateString) {
             var today = new Date()
             var birthDate = new Date(dateString)
@@ -431,10 +459,12 @@ export default {
     data() {
         return {
             creds: {},
+            background: [],
+            logs: [],
             targetID: this.$route.params.targetID,
-            targetName: 'testName',
-            targetJob: 'testJob',
-            targetCompany: 'testCompany',
+            targetName: '',
+            targetJob: '',
+            targetCompany: '',
             target: {},
             ageNum: '',
             show: false,
@@ -442,9 +472,10 @@ export default {
             HTTPshow1: false,
             DNSshow: false,
             HTTPshow: false,
-            title: 'Your Logo',
+            title: '',
             edus: [],
             jobs: [],
+            currentJobs: [],
             attacksOnTarget: [],
             posts: []
         }
@@ -454,48 +485,102 @@ export default {
         var vm = this
         this.targetID = this.$route.params.targetID
         var storage = storageRef.ref()
-        db
-            .collection('targets')
-            .doc(this.targetID)
-            .get()
-            .then(doc1 => {
+        db.collection('logs').where('target', '==', this.targetID).orderBy("dateAdded", "desc").get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(logDoc => {
+                    var log = logDoc.data()
+                    log.id = logDoc.id
+                    log.date = new Date(log.dateAdded.seconds * 1000).toLocaleDateString()
+                    log.time = new Date(log.dateAdded.seconds * 1000).toLocaleTimeString()
+                    if (log.companyUrl) {
+                        log.logoUrl = `//logo.clearbit.com/${log.companyUrl}`
+                    }
+                    console.log(log);
+                    this.logs.push(log)
 
-                var tempObject = Object(doc1.data())
-                tempObject.edus.forEach(edu => {
-                    var eduRef = storage.child(edu.imgUrl)
+                })
+            })
+
+    },
+    watch: {
+        target(val) {
+            var vm = this
+            var tempObject = val
+            console.log(tempObject);
+            console.log(vm.target);
+
+            var storage = storageRef.ref()
+
+            console.log(tempObject);
+
+            tempObject.edus.forEach(edu => {
+                console.log(edu);
+
+                if (edu.imgUrl) {
+                    var imgParts = edu.imgUrl.split("/")
+                    var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`
+                    var eduRef = storage.child(fixedImg)
                     eduRef.getDownloadURL().then(url => {
                         edu.tempImgUrl = url
                     })
+                }
 
-
-                    this.edus.push(edu)
-                })
-
-                tempObject.jobs.forEach(job => {
-                    var jobRef = storage.child(job.imgUrl)
-                    jobRef.getDownloadURL().then(url => {
-                        job.tempImgUrl = url
-                    })
-
-                    this.jobs.push(job)
-
-                })
-
-                var imgUrl = tempObject.image
-
-
-                var targetsRef = storage.child(imgUrl)
-                targetsRef.getDownloadURL().then(url => {
-                    vm.target.tmpImg = url
-                })
-
+                this.edus.push(edu)
 
             })
 
-       
+            var sortedJobs = []
+
+            tempObject.jobs.forEach(job => {
+
+                if (job.imgUrl) {
+                    var imgParts = job.imgUrl.split("/")
+                    var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`
+                    var jobRef = storage.child(fixedImg)
+                    jobRef.getDownloadURL().then(url => {
+                        job.tempImgUrl = url
+                        console.log(url);
+
+                    })
+                }
+
+                if (job.isPresent) {
+                    this.currentJobs.push(job)
+                } else {
+                    sortedJobs.push(job)
+                }
+
+                console.log(job);
+
+            })
+
+            sortedJobs.sort(function (a, b) {
+
+                return b.sortEndDate.seconds - a.sortEndDate.seconds
+
+            })
+
+            this.jobs = sortedJobs
+
+            var imgUrl = tempObject.image
+
+            var imgParts = imgUrl.split("/")
+            var fixedImg = `${imgParts[0]}/${imgParts[1]}/fixed_${imgParts[2]}`
+            var targetsRef = storage.child(fixedImg)
+            targetsRef.getDownloadURL().then(url => {
+                tempObject.tmpImg = url
+            })
+
+            console.log(tempObject);
+
+        },
+
+        currentJobs(val) {
+            console.log(val);
+
+        }
     },
-    mounted() {
-    },
+    mounted() {},
     created() {
 
     }
@@ -503,6 +588,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 /* .v-avatar {
     height: 60px !important;

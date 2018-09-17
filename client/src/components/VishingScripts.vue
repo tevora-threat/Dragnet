@@ -1,6 +1,6 @@
 <template>
 <v-container fluid>
-    <h2>Vishing Scripts</h2>
+    <h1>Vishing Scripts</h1>
     <br>
     <v-layout row>
         <v-flex xs12 sm6 offset-sm3>
@@ -15,10 +15,10 @@
             </div>
             <v-card>
                 <v-list>
-                    <v-list-group v-for="category in categories" v-model="category.active" :key="category.id">
+                    <v-list-group v-if="category.scripts.length>0" v-for="category in categories" v-model="category.active" :key="category.id">
                         <v-list-tile slot="activator">
                             <v-list-tile-content>
-                                <v-list-tile-title>{{ category.nickname }}</v-list-tile-title>
+                                <v-list-tile-title><b>{{ category.nickname }}</b></v-list-tile-title>
                             </v-list-tile-content>
                         </v-list-tile>
                         <v-list-tile v-for="subItem in category.scripts" :key="subItem.id" @click="log(subItem.id)">
@@ -70,12 +70,19 @@ export default {
                         .get()
                         .then(querySnapshot => {
                             querySnapshot.forEach(doc2 => {
-                                category.scripts.push(doc2.data());
+                                var scriptObject = doc2.data()
+                                scriptObject.id = doc2.id
+
+                                category.scripts.push(scriptObject);
                             });
                         });
 
+                    
+
                     this.categories.push(category);
+                    
                 });
+                
             });
     },
     computed: {
@@ -89,6 +96,8 @@ export default {
     },
     methods: {
         log: function (logMsg) {
+            console.log(logMsg);
+            
             var vm = this;
             vm.$router.push({
                 name: "SingleScript",

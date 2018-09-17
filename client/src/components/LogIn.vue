@@ -38,8 +38,7 @@ export default {
                     vm.$router.push({
                         name: 'Engagements',
                     })
-                }, err => {
-                })
+                }, err => {})
         }
     },
     data() {
@@ -52,14 +51,14 @@ export default {
     created() {
         firebase.auth().onAuthStateChanged(user => {
             this.authUser = user
-            if (user) {
-            }
+            if (user) {}
         })
     }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 
 </style>

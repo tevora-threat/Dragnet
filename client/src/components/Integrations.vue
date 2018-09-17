@@ -177,6 +177,8 @@ export default {
     data() {
         return {
             valid: true,
+            dialog: false,
+            dialog2: false,
             valid1: true,
             valid2: true,
             rules: {
@@ -241,8 +243,7 @@ export default {
                 var ref = db
                     .collection('smtpservers')
                     .add(this.newSMTP)
-                    .then(function (docRef) {
-                    })
+                    .then(function (docRef) {})
                     .then(ref => {
                         this.dialog = false
                         this.$refs.form.reset()
@@ -271,7 +272,7 @@ export default {
                     .collection('landingpages')
                     .add(this.newLanding)
                     .then(function (docRef) {
-                        
+
                     })
                     .then(ref => {
                         this.dialog2 = false
@@ -308,6 +309,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 h1,
 h2 {

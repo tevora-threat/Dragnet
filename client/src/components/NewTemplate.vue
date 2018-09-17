@@ -17,6 +17,10 @@
                     <v-flex xs6>
                         <v-select :items="landingPages" item-value="value" v-model="selectedLandingPage" label="Landing Page" single-line></v-select>
                     </v-flex>
+                    <v-flex xs3>
+                        <v-text-field id="domainTail" autocomplete="off" name="input-domainTail" v-model="domainTail" hint="This goes between your landing page url and the tracking identifier." label="Tail (ex. /?ref=)"></v-text-field>
+
+                    </v-flex>
 
                     <v-flex xs6>
                         <v-checkbox color="blue darken-1" label="Send at a certain time?" v-model="scheduledSend"></v-checkbox>
@@ -45,10 +49,21 @@
                     </v-flex>
 
                     <v-flex xs8>
-                        <v-text-field id="testing" name="input-1" v-model="templateName" label="Template Name"></v-text-field>
+                        <v-text-field id="testing" autocomplete="off" name="input-1" v-model="templateName" label="Template Name"></v-text-field>
                     </v-flex>
                     <v-flex xs12>
-                        <v-select v-model="selectedTags" :items="tags" item-value="value" label="Tags" chips tags></v-select>
+                        <v-combobox v-model="selectedTags" :items="tags" item-text="nickname" item-value="id" :search-input.sync="search" return-object hide-selected hint="Maximum of 5 tags" label="Add some tags" multiple persistent-hint small-chips>
+                            <template slot="no-data">
+                                <v-list-tile>
+                                    <v-list-tile-content>
+
+                                        <v-list-tile-title>
+                                            No tags matching "<strong>{{ search }}</strong>". Press <kbd>enter</kbd> to create one.
+                                        </v-list-tile-title>
+                                    </v-list-tile-content>
+                                </v-list-tile>
+                            </template>
+                        </v-combobox>
                     </v-flex>
                     <v-flex xs8>
                         <v-text-field id="fromAddress" name="input-fromAddress" v-model="fromAddress" label="'From' Address"></v-text-field>
@@ -62,13 +77,10 @@
                     </v-flex>
                     <h3>Content</h3><br>
                     <h4>Tokens for use in templates</h4>
-                    First Name:
-                    <pre>${firstName}</pre> Last Name:
-                    <pre>${lastName}</pre> Phone Number:
-                    <pre>${phoneNumber}</pre> Email Address:
-                    <pre>${emailAddress}</pre>
-                    <v-tabs icons-and-text centered dark color="cyan">
-                        <v-tabs-slider color="yellow"></v-tabs-slider>
+                    <code>${firstName}</code> <code>${lastName}</code> <code>${fullName}</code> <code>${emailAddress}</code> <code>${phoneNumber}</code> <code>${landingPage}</code>
+                    <br><br>
+                    <v-tabs icons-and-text centered dark color="blue darken-1">
+                        <v-tabs-slider color="black lighten-4"></v-tabs-slider>
                         <v-tab @click="updateHTML" href="#tab-1">
                             Render
                             <v-icon>email</v-icon>
@@ -127,8 +139,6 @@ export default {
             menu2: false,
             menu3: false,
             scheduledSend: false,
-            //       content: `
-            // <h1 class="ql-align-center"> <span class="ql-font-serif"><span class="ql-cursor">﻿</span>I am Example 3!</span></span> </h1><center><h2 style="color:red;">red text</h2></center> <p><br></p> <p><strong class="ql-font-serif">Whenever you play the game of thrones, you either win or die. There is no middle ground.</strong></p> <p><br></p> <p><u class="ql-font-serif">Some war against sword and spear to win, and the others the crow and the paper to win.</u></p> <p><br></p> <p><em class="ql-font-serif">Dead history is write in ink, the living sort in blood.</em></p> <p><br></p> <p><span class="ql-font-serif" style="color: rgb(0, 102, 204);">They're only numbers. Numbers on paper. Once you understand that, it's easy to make them behave.</span></p> <p><br></p> <p><span class="ql-font-serif">Every time we deal with an enemy, we create two more.</span></p> <p><br></p> <p><span class="ql-font-serif">So the king has decreed. The small council consents.</span></p> <p><br></p> <p><span class="ql-font-serif">Chaos not is a pit, chaos is a ladder.</span></p> <p><br></p> <p><span class="ql-font-serif">A chain needs all sorts of metals, and a land needs all sorts of people.</span></p> <p><br></p> <p><span class="ql-font-serif">When the snows fall and the white winds blow, the lone wolf dies, but the pack survives.</p>`,
             content: `<b>bold</b><br><i>italic</i>`,
             contentBlob: `<b>bold</b><br><i>italic</i>`,
             selectedTags: [],
@@ -170,8 +180,11 @@ export default {
                 }
             ],
             tags: [],
+            selectedTags: [],
             servers: [],
             landingPages: [],
+            selectedLandingPage: '',
+            domainTail: '',
 
             categoryLabels: [],
             categories: [],
@@ -179,7 +192,6 @@ export default {
             projects: [],
             script: {},
             template: {},
-            templateTags: {},
             templateID: '',
             search: '',
             testTemplate: '',
@@ -234,6 +246,22 @@ export default {
 
                 })
             })
+
+        db
+            .collection('tags')
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(doc1 => {
+
+                    var tempObject = {
+                        nickname: doc1.data().nickname,
+                        id: doc1.id
+                    }
+
+                    this.tags.push(tempObject)
+
+                })
+            })
     },
     computed: {
         computedDateFormatted() {
@@ -253,6 +281,12 @@ export default {
 
         date2(val) {
             this.date2Formatted = this.formatDate(this.date2)
+        },
+
+        selectedTags(val) {
+            if (val.length > 5) {
+                this.$nextTick(() => this.selectedTags.pop())
+            }
         }
     },
     methods: {
@@ -292,6 +326,8 @@ export default {
 
         saveTemplate() {
 
+            var vm = this
+
             var tempObject = {}
             tempObject.tags = {}
             tempObject.title = this.templateName
@@ -312,38 +348,92 @@ export default {
 
             tempObject.template = tempTemplate
 
-            if (typeof this.selectedCategory === 'string') {
+            function checkTags(tags) {
+                var finalSelectedTags = {}
 
-                var ref = db
-                    .collection('categories')
-                    .add({
-                        nickname: this.selectedCategory
-                    })
-                    .then(function (newCategory) {
-                        tempObject.category = newCategory.id
+                tags.forEach(tag => {
+                    if (typeof tag === 'string') {
 
-                        var ref2 = db
-                            .collection('emailTemplates')
-                            .add(tempObject)
-                            .then(function (docRef) {
+                        var ref = db
+                            .collection('tags')
+                            .add({
+                                nickname: tag
+                            })
+                            .then(function (newTag) {
+                                finalSelectedTags[newTag.id] = true
 
                             })
+                    } else {
 
-                    })
-            } else {
-                tempObject.category = this.selectedCategory.id,
-                    tempObject.cNick = this.selectedCategory.nickname
+                        finalSelectedTags[tag.id] = true
 
-                var ref = db
-                    .collection('emailTemplates')
-                    .add(tempObject)
-                    .then(function (docRef) {
+                    }
 
-                    }).catch(err => {
-                        console.log(err);
+                });
 
-                    })
+                return finalSelectedTags
             }
+
+            tempObject.tags = checkTags(vm.selectedTags)
+
+            function checkCategory(category) {
+                if (typeof category === 'string') {
+
+                    var ref = db
+                        .collection('categories')
+                        .add({
+                            nickname: category
+                        })
+                        .then(function (newCategory) {
+                            tempObject.category = newCategory.id
+                            var ref = db
+                                .collection('emailTemplates')
+                                .add(tempObject)
+                                .then(function (docRef) {
+                                    console.log("New email template created: ", docRef.id);
+
+                                    //setting up for conversions/retraining now
+                                    db.collection('conversions').doc(docRef.id).set({
+                                        type: 'phishing',
+                                        status: 'new'
+                                    })
+
+                                    vm.$router.push({
+                                        name: 'EmailTemplates',
+                                    })
+
+                                })
+
+                        })
+                } else {
+                    tempObject.category = category.id,
+                        tempObject.cNick = category.nickname
+                    var ref = db
+                        .collection('emailTemplates')
+                        .add(tempObject)
+                        .then(function (docRef) {
+                            console.log("New email template created: ", docRef.id);
+
+                            //setting up for conversions/retraining now
+                            db.collection('conversions').doc(docRef.id).set({
+                                type: 'phishing',
+                                status: 'new'
+                            })
+
+                            vm.$router.push({
+                                name: 'EmailTemplates',
+                            })
+
+                        })
+
+                }
+
+                // return checkTags(vm.selectedTags)
+            }
+
+            checkCategory(this.selectedCategory)
+
+            console.log(tempObject);
 
         }
     }
@@ -351,6 +441,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 h1,
 h2 {

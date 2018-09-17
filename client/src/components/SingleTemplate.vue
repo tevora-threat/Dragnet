@@ -1,6 +1,7 @@
 <template>
 <v-container fluid>
-    <h2>Phishing Templates > {{template.category}} > {{template.title}}</h2>
+    <h2>Phishing Templates > {{template.cNick}} > {{template.title}}</h2>
+    <h4>PAGE IS WIP</h4>
     <br>
     <v-layout row>
         <v-flex xs12>
@@ -8,14 +9,8 @@
             <v-card>
                 <v-container>
                     <h3>Category</h3>
-                    <b>{{template.category}}</b><br><br>
-                    <h3>Tags</h3>
-                    <v-chip v-if="templateTags.urgent" color="blue" text-color="white">Urgent</v-chip>
-                    <v-chip v-if="templateTags.breach" color="red" text-color="white">Breach</v-chip>
-                    <v-chip v-if="templateTags.recruit" color="brown" text-color="white">Recruit</v-chip>
-                    <v-chip v-if="templateTags.sales" color="orange" text-color="white">Sales</v-chip>
-                    <v-chip v-if="templateTags.help" color="brown" text-color="white">Help</v-chip>
-                    <br><br>
+                    <b>{{template.cNick}}</b><br><br>
+                   
                     <h3>Subject Line</h3>
                     <h4>{{template.subjectLine}}</h4>
                     <br><br>
@@ -26,7 +21,10 @@
                     </div>
                 </v-container>
 
-            </v-card>
+            </v-card><br><br>
+            <code>
+            {{injectionCode}}    
+            </code>
             <v-btn @click="deleteTemplate" color="error">Delete (should only allow hide for final)</v-btn><br>Shouldn't allow editing because it would skew the stats for correlation. Click to clone / create variation coming in another version.
         </v-flex>
     </v-layout>
@@ -41,17 +39,57 @@ export default {
     data() {
         return {
             items: [],
+            cloudFuncsEndpointURl:'test',
+            landingPageUrl:'t',
+            injectionCode:`
+<script>
+function getCookie(name) {
+      var cookies = '; ' + document.cookie;
+      var splitCookie = cookies.split('; ' + name + '=');
+      if (splitCookie.length == 2) return splitCookie.pop();
+    }
+
+    if (getCookie('aID')) {
+      console.log(getCookie('aID'));
+      var aID = getCookie('aID');
+      var cookieImg = new Image();
+      cookieImg.src = 'https://${this.cloudFuncsEndpointURl}.cloudfunctions.net/analytics?aID=' + aID;
+
+    } else {
+      console.log('not set');
+
+      function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var
+          regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+          results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2])
+          return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+      }
+
+      document.cookie = "aID=" + getParameterByName('aID') + "; expires=365; path=/";
+      window.location = "${this.landingPageUrl}";
+
+    }
+<\/script>`,
             projects: [],
             template: {},
             templateTags: {},
+            tags: [],
             templateID: "",
             search: "",
             testTemplate: "",
+            landingpage:'',
             targetName: "John Doe"
         };
     },
     beforeCreate() {
         this.templateID = this.$route.params.templateID;
+
+        let existingTags = []
 
         db
             .collection("emailTemplates")
@@ -60,21 +98,36 @@ export default {
             .then(doc1 => {
                 var tempObject = Object(doc1.data());
                 tempObject.id = doc1.id;
+
+                db.collection('landingpages').doc(tempObject.landingPages).get().then(doc1=>{
+                this.landingPage = doc1.data().url
+                console.log(this.landingPage);
                 
-                var newLineString = tempObject.template.replace("\\n", "\n");
-                var renderTemplate = newLineString.replace(
-                    "${targetName}",
-                    this.targetName
-                );
-                var renderSubject = tempObject.subjectLine.replace(
-                    "${targetName}",
-                    this.targetName
-                );
+            })
+
+            console.log(tempObject);
+            
+
+               
                 tempObject.subjectLine = renderSubject;
                 tempObject.template = renderTemplate;
+                this.tags = tempObject.tags
+                console.log(this.tags);
+
+                db.collection("tags")
+                    .get()
+                    .then(querySnapshot => {
+                        querySnapshot.forEach(doc1 => {
+                            var tagObject = {}
+                            tagObject[doc1.id] = doc1.data().nickname
+                            existingTags.push(tagObject)
+                        })
+                    })
+
                 this.template = tempObject;
-                this.templateTags = tempObject.tags;
             });
+
+            
     },
     created() {},
     computed: {},
@@ -96,6 +149,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 h1,
 h2 {

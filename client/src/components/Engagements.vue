@@ -173,7 +173,7 @@
                                             </div>
                                         </v-flex>
                                         <v-flex xs5>
-                                            <v-card-media style="border-readius:50%;" :src="engagement.logoUrl" height="125px" contain></v-card-media>
+                                            <v-card-media style="border-radius:50%;" :src="engagement.logoUrl" height="125px" contain></v-card-media>
                                         </v-flex>
                                     </v-layout>
                                 </v-container>
@@ -271,13 +271,11 @@ export default {
                 } else {
                     vm.timesChosen.push('Completed')
                 }
-            } else {
             }
         },
         runUpdate() {
 
-            this.engagements.forEach(engagement => {
-            })
+            this.engagements.forEach(engagement => {})
         },
         toEngagement(engagement) {
             var vm = this
@@ -306,9 +304,6 @@ export default {
                 }
 
                 tempObject.status = 'targetSelection'
-                tempObject.timeStat = 'Upcoming'
-
-               
 
                 tempObject.startDate = new Date(`${this.date}` + 'T10:00:00')
                 tempObject.endDate = new Date(this.date2 + 'T18:00:00')
@@ -317,7 +312,6 @@ export default {
                     .collection('engagements')
                     .add(tempObject)
                     .then(function (docRef) {
-                        
 
                         vm.$router.push({
                             name: 'SingleEngagement',
@@ -335,13 +329,11 @@ export default {
                 tempClient.clientName = this.companySelected
                 tempClient.domainName = ''
 
-               
-
                 var ref = db
                     .collection('companies')
                     .add(tempClient)
                     .then(function (docRef) {
-                        
+
                         // var vm = this;
                         var tempObject = {}
                         tempObject.company = docRef.id
@@ -354,17 +346,14 @@ export default {
 
                         tempObject.status = 'targetSelection'
 
-                      
 
-                        tempObject.startDate = new Date(`${this.date}` + 'T10:00:00')
-                        tempObject.endDate = new Date(this.date2 + 'T18:00:00')
+                        tempObject.startDate = new Date(this.date)
+                        tempObject.endDate = new Date(this.date2)
 
                         var ref = db
                             .collection('engagements')
                             .add(tempObject)
                             .then(function (docRef) {
-                                
-                              
 
                                 vm.$router.push({
                                     name: 'SingleEngagement',
@@ -385,8 +374,7 @@ export default {
                 }
             })
         },
-        testLog() {
-        },
+        testLog() {},
         formatDate(date) {
             if (!date) return null
 
@@ -456,7 +444,7 @@ export default {
 
     firestore() {
         return {
-            engagements: db.collection('engagements').orderBy('startDate', 'desc')
+            engagements: db.collection('engagements').orderBy('startDate', 'desc'),
         }
     },
     watch: {
@@ -475,7 +463,21 @@ export default {
                 day: 'numeric'
             }
             var tempObject = val
+
             tempObject.forEach(engagement => {
+
+                if (engagement.endDate.seconds < new Date().getTime() / 1000) {
+                    engagement.timeStat = 'Completed'
+
+                } else if (engagement.startDate.seconds > new Date().getTime() / 1000) {
+                    engagement.timeStat = 'Upcoming'
+                    var dateSeconds = new Date().getSeconds()
+
+                } else {
+                    engagement.timeStat = 'In Progress'
+
+                }
+
                 engagement.pSD = new Date(
                     engagement.startDate.seconds * 1000
                 ).toLocaleDateString('en-US', options)
@@ -485,7 +487,8 @@ export default {
 
             })
 
-        }
+        },
+
     },
     computed: {
         computedDateFormatted() {
@@ -525,6 +528,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 h1,
 h2 {

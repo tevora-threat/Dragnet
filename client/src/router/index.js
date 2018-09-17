@@ -15,6 +15,7 @@ import NewTemplate from '@/components/NewTemplate'
 import SingleEngagement from '@/components/SingleEngagement'
 import SingleAttack from '@/components/SingleAttack'
 import Integrations from '@/components/Integrations'
+import FirstImport from '@/components/FirstImport'
 import firebase from 'firebase'
 Vue.use(Router)
 
@@ -140,6 +141,14 @@ let router = new Router({
       path: '/integrations',
       name: 'Integrations',
       component: Integrations,
+      meta: {
+        requiresAuth: true
+      }
+    },
+    {
+      path: '/import',
+      name: 'FirstImport',
+      component: FirstImport,
       meta: {
         requiresAuth: true
       }

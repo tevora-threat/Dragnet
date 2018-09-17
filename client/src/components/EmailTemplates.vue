@@ -1,6 +1,6 @@
 <template>
 <v-container fluid>
-    <h2>Email Templates</h2>
+    <h1>Email Templates</h1>
     <br>
     <v-layout row>
         <v-flex xs12 sm6 offset-sm3>
@@ -16,10 +16,10 @@
             </div>
             <v-card>
                 <v-list>
-                    <v-list-group v-for="category in categories" v-model="category.active" :key="category.id" no-action>
+                    <v-list-group v-if="category.templates.length>0" v-for="category in categories" v-model="category.active" :key="category.id">
                         <v-list-tile slot="activator">
                             <v-list-tile-content>
-                                <v-list-tile-title>{{ category.nickname }}</v-list-tile-title>
+                                <v-list-tile-title> <b> {{ category.nickname }} </b> </v-list-tile-title>
                             </v-list-tile-content>
                         </v-list-tile>
                         <v-list-tile v-for="subItem in category.templates" :key="subItem.id" @click="log(subItem.id)">
@@ -67,7 +67,11 @@ export default {
                     db.collection('emailTemplates').where('category', '==', doc1.id).get()
                         .then(querySnapshot => {
                             querySnapshot.forEach(doc2 => {
-                                category.templates.push(doc2.data())
+                                var tempTemplate = doc2.data()
+                                tempTemplate.id = doc2.id
+                                category.templates.push(tempTemplate)
+                                console.log(tempTemplate);
+
                             })
                         })
                     this.categories.push(category)
@@ -98,6 +102,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 h1,
 h2 {
