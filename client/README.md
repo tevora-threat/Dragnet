@@ -7,6 +7,8 @@ Be sure to add your project configs in the ../configs directory.
 
 *If you don't set up security rules correctly on Firebase, the only one getting hacked will be you.*
 
+You will need to enable email authentication in Firebase, and create an account using the console. This is the email / password you'll use to log into Dragnet.
+
 ## Build Setup
 
 ```bash
