@@ -4,12 +4,10 @@
 ![OPEN-SOURCE](https://img.shields.io/badge/OPEN-SOURCE-orange.svg)
 [![GPL Licence](https://img.shields.io/badge/LICENSE-GPLv3-blue.svg)](https://opensource.org/licenses/GPL-3.0/)
 
-v0.1 Status: ![Progress](http://progressed.io/bar/100)
-*Full README coming shortly*
+v0.1 Status: ![Progress](http://progressed.io/bar/100)   -   *Full README coming shortly*
 
 Next Up:
-v0.2 Status: ![Progress](http://progressed.io/bar/21)
-Date Expected: September 28, 2018
+v0.2 Status: ![Progress](http://progressed.io/bar/21)   -   *Date Expected: September 28, 2018*
 
 *Because this system has so many moving parts, things may not "just work" until later versions. It is recommended to watch this repo so that you're notified when new versions are pushed. Big features like automated infrustructure deployment are coming soon.*
 
