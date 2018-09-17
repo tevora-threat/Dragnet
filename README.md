@@ -24,5 +24,6 @@ There is a full readme coming soon, but the short version is:
 - functions will be deployed to cloud functions
 - cron setup is necessary
 - npm install anywhere you see a package.json
+- keep the /root paths at your own risk 😇
 
 *Development will be ongoing and commits will occur frequently. Check back often- as breaking changes are discovered, fixes will be pushed whenever possible.*
