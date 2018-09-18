@@ -19,7 +19,7 @@ Read the abstract [here](https://defcon.org/html/defcon-26/dc-26-speakers.html#K
 
 # Getting started
 There is a full readme coming soon, but the short version is:
-- Everything in the admin directory can be set up on a a cloud VM (preferably Ubuntu 18.x)
+- Everything in the admin directory can be set up on a cloud VM (preferably Ubuntu 18.x)
 - client should be run locally
 - functions will be deployed to cloud functions
 - cron setup is necessary
