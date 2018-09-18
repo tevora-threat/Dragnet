@@ -27,3 +27,9 @@ There is a full readme coming soon, but the short version is:
 - keep the /root paths at your own risk 😇
 
 *Development will be ongoing and commits will occur frequently. Check back often- as breaking changes are discovered, fixes will be pushed whenever possible.*
+
+
+
+## Disclaimer
+
+This framework is provided for educational purposes only. Using this framework without permission from all appropriate parties may be against the terms of service of respective parties, and may be against the law depending on your jurisdiction. Use at your own risk.
