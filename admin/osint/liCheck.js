@@ -74,7 +74,7 @@ function* run() {
         .cookies.set({
             url: "https://www.linkedin.com",
             name: "li_at",
-            value: "CHANGEME"
+            value: ""
         })
         .goto(linkedInURL)
 
