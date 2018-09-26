@@ -4,7 +4,7 @@
 ![OPEN-SOURCE](https://img.shields.io/badge/OPEN-SOURCE-orange.svg)
 [![GPL Licence](https://img.shields.io/badge/LICENSE-GPLv3-blue.svg)](https://opensource.org/licenses/GPL-3.0/)
 
-v0.1 Status: ![Progress](http://progressed.io/bar/100)   -   *Full README coming shortly*
+v0.1 Status: ![Progress](http://progressed.io/bar/100)   -   *Full README posted below*
 
 Next Up:
 v0.2 Status: ![Progress](http://progressed.io/bar/21)   -   *Date Expected: September 28, 2018*
@@ -18,11 +18,11 @@ Presented at DEFCON 26 & GrrCON, Dragnet is a social engineering framework which
 Read the abstract [here](https://defcon.org/html/defcon-26/dc-26-speakers.html#Kain).
 
 # Getting started
-There is a full readme coming soon, but the short version is:
+There is a full readme [here](https://dragnet.gitbook.io/user-guide/), but the short version is:
 - Everything in the admin directory can be set up on a cloud VM (preferably Ubuntu 18.x)
 - client should be run locally
 - functions will be deployed to cloud functions
-- cron setup is necessary
+- cron instructions will be posted later today (for scheduled emails only) - 9/26/18
 - npm install anywhere you see a package.json
 - keep the /root paths at your own risk 😇
 
