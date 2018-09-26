@@ -1,7 +1,8 @@
 # Dragnet - Your Social Engineering Sidekick
 [![DEFCON 26 Badge](https://img.shields.io/badge/DEFCON-26-blue.svg)](https://defcon.org/html/defcon-26/dc-26-speakers.html#Kain)
 [![GRRCON 2018 Badge](https://img.shields.io/badge/GRRCON-2018-green.svg)](https://grrcon.com/presentations)
-![OPEN-SOURCE](https://img.shields.io/badge/OPEN-SOURCE-orange.svg)
+[![SAINTCON 2018 Badge](https://img.shields.io/badge/SAINTCON-2018-%23ffc107.svg)](https://saintcon.org)
+[![OPEN-SOURCE](https://img.shields.io/badge/OPEN-SOURCE-orange.svg)](#)
 [![GPL Licence](https://img.shields.io/badge/LICENSE-GPLv3-blue.svg)](https://opensource.org/licenses/GPL-3.0/)
 
 v0.1 Status: ![Progress](http://progressed.io/bar/100)   -   *Full README posted below*
@@ -13,7 +14,7 @@ v0.2 Status: ![Progress](http://progressed.io/bar/21)   -   *Date Expected: Sept
 
 ![Dragnet Social Engineering Framework](https://threat.tevora.com/content/images/2018/08/dragnet-social-engineering-1.png)
 
-Presented at DEFCON 26 & GrrCON, Dragnet is a social engineering framework which leverages AI to conduct spear-phishing & vishing at scale.
+Presented at DEFCON 26, GrrCON 2018 & SAINTCON 2018, Dragnet is a social engineering framework which leverages AI to conduct spear-phishing & vishing at scale.
 
 Read the abstract [here](https://defcon.org/html/defcon-26/dc-26-speakers.html#Kain).
 
