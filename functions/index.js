@@ -629,30 +629,6 @@ exports.testEmailAttack = functions.firestore
     return getTemplate
   })
 
-const mailTransport = nodemailer.createTransport({
-  host: 'mail.YOURDOMAIN.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'dragnet',
-    pass: 'CHANGEME'
-  }
-})
-
-exports.firstEmail = functions.https.onRequest(async (req, res) => {
-  const mailOptions = {
-    from: `Dragnet <dragnet@YOURDOMAIN.com>`,
-    to: 'replaceme@yourdomain.com'
-  }
-
-  mailOptions.subject = `Bye!`
-  mailOptions.text = `Hey guy!`
-  await mailTransport.sendMail(mailOptions)
-  console.log('Account deletion confirmation email sent.')
-})
-
-
-
 exports.logFollowUp = functions.firestore
   .document('logs/{logID}')
   .onCreate((snap, context) => {
