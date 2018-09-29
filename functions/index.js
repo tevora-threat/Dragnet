@@ -19,7 +19,6 @@ const request = require('request')
 const admin = require('firebase-admin')
 admin.initializeApp()
 
-
 exports.fixImages = functions.storage.object().onFinalize((object) => {
   const fileBucket = object.bucket; // The Storage bucket that contains the file.
   const filePath = object.name; // File path in the bucket.
@@ -91,8 +90,8 @@ exports.getCompanyLogo = functions.firestore
           const copyOver = clientRef.set({
             imgUrl: `https://logo.clearbit.com/${company.domainName}`
           }, {
-            merge: true
-          })
+              merge: true
+            })
 
 
           console.log("got logo");
@@ -205,8 +204,8 @@ exports.minutely_job = functions.pubsub
             const updateAttack = admin.firestore().doc(`attacks/${scheduledEmail.id}`).set({
               status: 'sent'
             }, {
-              merge: true
-            })
+                merge: true
+              })
 
             Promise.all([updateLog, updateAttack])
 
@@ -316,8 +315,8 @@ exports.updateSpreadsheet = functions.firestore
             lastUpdatedCSV: newCSV,
             status: 'notNew'
           }, {
-            merge: true
-          })
+              merge: true
+            })
 
           return updateCSV.then(doc1 => {
             console.log('csv updated: ', doc1.id);
@@ -410,8 +409,8 @@ exports.updateSpreadsheet = functions.firestore
             const updateCSV = admin.firestore().collection('conversions').doc(templateID).set({
               lastUpdatedCSV: newCSV
             }, {
-              merge: true
-            })
+                merge: true
+              })
 
             return updateCSV.then(doc1 => {
               console.log('csv updated: ', doc1.id);
@@ -541,8 +540,8 @@ exports.sendIt = functions.firestore.document('attacks/{attackID}').onUpdate((ch
       const updateAttack = admin.firestore().doc(`attacks/${context.params.attackID}`).set({
         status: 'sent'
       }, {
-        merge: true
-      })
+          merge: true
+        })
 
       Promise.all([updateLog, updateAttack])
 
@@ -668,8 +667,8 @@ exports.logFollowUp = functions.firestore
         const updateWithTarget = snap.ref.set({
           targetID: targetID
         }, {
-          merge: true
-        })
+            merge: true
+          })
         return updateWithTarget
       })
       return getTarget
@@ -706,8 +705,8 @@ exports.updateCall = functions.https.onRequest((req, res) => {
       .set({
         status: "waitingResult"
       }, {
-        merge: true
-      })
+          merge: true
+        })
 
     Promise.all([setLog, updateAttack]).then(() => {
       res.status(200).send('some text')
@@ -732,8 +731,8 @@ exports.updateCall = functions.https.onRequest((req, res) => {
       .set({
         status: "callingTarget"
       }, {
-        merge: true
-      })
+          merge: true
+        })
 
     Promise.all([setLog, updateAttack]).then(() => {
       res.status(200).send('some text')
@@ -813,8 +812,8 @@ exports.login = functions.https.onRequest(async (req, res) => {
       credsEmail: email,
       credsPW: password
     }, {
-      merge: true
-    })
+        merge: true
+      })
 
   res.json({
     result: `loaded`
@@ -842,8 +841,8 @@ exports.copyEgToTarget = functions.firestore
       vishing: egTargetBlob.vishing,
       phishing: egTargetBlob.phishing
     }, {
-      merge: true
-    })
+        merge: true
+      })
     console.log('Copied from Engagement.Targets to Targets.Target.Engagements')
 
     return copyOver
@@ -903,8 +902,8 @@ exports.copyAttackLink = functions.firestore
       const copyOver = targetRef.set({
         phishingAttackLink: attackID
       }, {
-        merge: true
-      })
+          merge: true
+        })
       console.log(
         'Copied link for attack from Attacks to Engagements.eID.Targets.tID'
       )
@@ -913,8 +912,8 @@ exports.copyAttackLink = functions.firestore
         content: template,
         subjectLine: subjectLine
       }, {
-        merge: true
-      })
+          merge: true
+        })
       console.log('Phishing template/subjectLine tokens replaced.')
 
       Promise.all([updateAttack, copyOver])
@@ -943,16 +942,16 @@ exports.copyAttackLink = functions.firestore
       const updateAttack = attackRef.script.set({
         content: template,
       }, {
-        merge: true
-      })
+          merge: true
+        })
       console.log('Vishing script tokens replaced.')
 
 
       const copyOver = targetRef.set({
         vishingAttackLink: attackID
       }, {
-        merge: true
-      })
+          merge: true
+        })
 
       const canRecordStatus = admin
         .firestore()
@@ -967,8 +966,8 @@ exports.copyAttackLink = functions.firestore
         attackRef.set({
           canRecord: results[1]
         }, {
-          merge: true
-        })
+            merge: true
+          })
       })
 
     }
@@ -1020,8 +1019,8 @@ exports.osintQueueUpdate = functions.firestore
           const updateStatus = nextTarget.ref.set({
             status: 'started'
           }, {
-            merge: true
-          })
+              merge: true
+            })
           const osintReq = request(options, function (error, response, body) {
             if (error) throw new Error(error);
 
@@ -1083,8 +1082,8 @@ exports.hasLinkedIn = functions.firestore
             status: 'started',
             timeAdded: new Date()
           }, {
-            merge: true
-          })
+              merge: true
+            })
 
 
           Promise.all([addToQueue, osintReq])
@@ -1093,8 +1092,8 @@ exports.hasLinkedIn = functions.firestore
             status: 'waiting',
             timeAdded: new Date()
           }, {
-            merge: true
-          })
+              merge: true
+            })
           Promise.all([addToQueue])
         }
       })
@@ -1146,8 +1145,8 @@ exports.hasLinkedIn = functions.firestore
       const updateQueue = admin.firestore().doc(`osintQueue/${context.params.targetID}`).set({
         status: 'completed'
       }, {
-        merge: true
-      })
+          merge: true
+        })
 
       return updateQueue
 
@@ -1182,8 +1181,8 @@ exports.attackFlow = functions.firestore
       const mlStartResponse = theRef.set({
         mainStatus: 'Starting ML Prediction'
       }, {
-        merge: true
-      })
+          merge: true
+        })
 
       return mlStartResponse.then(() => {
 
@@ -1232,8 +1231,8 @@ exports.startOSINT = functions.firestore
     const startOSINT = snap.ref.set({
       mainStatus: 'Starting OSINT'
     }, {
-      merge: true
-    })
+        merge: true
+      })
 
 
 
@@ -1241,8 +1240,8 @@ exports.startOSINT = functions.firestore
       if (clearBitToken != '') {
         var Person = clearbit.Person
         Person.find({
-            email: targetEmail
-          })
+          email: targetEmail
+        })
           .then(function (person) {
             //console.log('Name: ', person.name.fullName);
             console.log('Blob: ', person.linkedin.handle)
@@ -1251,8 +1250,8 @@ exports.startOSINT = functions.firestore
               linkedInURL: liURL,
               liStatus: 'notChecked'
             }, {
-              merge: true
-            })
+                merge: true
+              })
 
             return updateWithLI
           })
