@@ -15,7 +15,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.6",
     "delay": "^3.1.0",
     "firebase": "^5.11.1",
-    "papaparse": "^4.6.3",
+    "papaparse": "^5.2.0",
     "vue": "^2.6.10",
     "vue-csv-import": "^1.6.0",
     "vue-firestore": "^0.2.11",
