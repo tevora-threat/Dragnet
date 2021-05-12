@@ -19,7 +19,7 @@
     "fast-csv": "^2.4.1",
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.5",
-    "nodemailer": "^4.6.8",
+    "nodemailer": "^6.4.16",
     "papaparse": "^4.5.0",
     "request": "^2.88.0",
     "util": "^0.11.0"
