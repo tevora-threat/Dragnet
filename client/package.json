@@ -52,7 +52,7 @@
     "postcss-url": "^7.2.1",
     "rimraf": "^2.6.3",
     "semver": "^5.7.0",
-    "shelljs": "^0.7.6",
+    "shelljs": "^0.8.5",
     "style-loader": "^0.21.0",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
